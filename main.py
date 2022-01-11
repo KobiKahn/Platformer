@@ -31,6 +31,8 @@ x_pad = 19
 y_pad = 17
 
 
+
+
 # SPRITE SHEET METHODS
 ################################################################################
 class SpriteSheet:
@@ -70,7 +72,7 @@ class SpriteSheet:
         return self.images_at(tups, colorkey)
 
 
-    def load_grid_images(self, num_rows, num_cols, x_margin=0, x_padding=0, y_margin=0, y_padding=0):
+    def load_grid_images(self, num_rows, num_cols, x_margin=0, x_padding=0, y_margin=0, y_padding=0, width = None, height = None, colorkey = None):
         """Load a grid of images.
         x_margin is the space between the top of the sheet and top of the first
         row. x_padding is space between rows. Assumes symmetrical padding on
@@ -84,10 +86,16 @@ class SpriteSheet:
         # To calculate the size of each sprite, subtract the two margins,
         #   and the padding between each row, then divide by num_cols.
         # Same reasoning for y.
-        x_sprite_size = (sheet_width - 2 * x_margin
-                         - (num_cols - 1) * x_padding) / num_cols
-        y_sprite_size = (sheet_height - 2 * y_margin
-                         - (num_rows - 1) * y_padding) / num_rows
+
+        if width and height:
+            x_sprite_size = width
+            y_sprite_size = height
+
+        else:
+            x_sprite_size = (sheet_width - 2 * x_margin
+                             - (num_cols - 1) * x_padding) / num_cols
+            y_sprite_size = (sheet_height - 2 * y_margin
+                             - (num_rows - 1) * y_padding) / num_rows
 
         sprite_rects = []
         for row_num in range(num_rows):
@@ -98,9 +106,12 @@ class SpriteSheet:
                 y = y_margin + row_num * (y_sprite_size + y_padding)
                 sprite_rect = (x, y, x_sprite_size, y_sprite_size)
                 sprite_rects.append(sprite_rect)
-        return self.images_at(sprite_rects)
+
+        return self.images_at(sprite_rects, colorkey)
 
 
+
+# PLAYER CLASS
 class player(pygame.sprite.Sprite):
     def __init__(self, picture_path, h_vel, v_vel):
         self.image = pygame.image.load(picture_path).convert_alpha()
@@ -116,45 +127,48 @@ class player(pygame.sprite.Sprite):
         pass
 
 
+# GAME SPRITE_SHEET
 
+temple_sheet = SpriteSheet('Temple_spritesheet.png')
 
+# GROUND
 
+temple_ground = temple_sheet.image_at((289, 480, 32, 32)).convert_alpha()
+temple_ground = pygame.transform.scale(temple_ground, (50, 50))
 
-# card = SpriteSheet('deck_of_cards.png')
-# card_list = card.load_grid_images(4, 14, x_margin, x_pad, y_margin, y_pad, -1)
-# print(card_list)
-# ace_hearts = card.image_at((11, 2, 44, 59))
-# print(ace_hearts)
-
-ninja = SpriteSheet('ninja-black-32x32.png')
-
-ninja_list = ninja.load_grid_images(6, 12, x_margin, x_pad, y_margin, y_pad)
-print(ninja_list)
 
 # DEFINE EACH NINJA ANIMATION
 
+ninja_sheet = SpriteSheet('ninja-black-32x32.png')
+
+ninja_list = ninja_sheet.load_grid_images(6, 12, x_margin, x_pad, y_margin, y_pad)
+# print(ninja_list)
+
+
+
 # IDLE
-ninja_idle = ninja.image_at((11, 11, 12, 16)).convert_alpha()
+ninja_idle = ninja_sheet.image_at((11, 11, 18, 16)).convert_alpha()
 ninja_idle = pygame.transform.scale(ninja_idle, (45, 50))
 
 
 # RUNNING
 
-ninja_run1 = ninja.image_at((40, 107, 12, 16)).convert_alpha()
+ninja_run1 = ninja_sheet.image_at((40, 107, 12, 16)).convert_alpha()
 ninja_run1 = pygame.transform.scale(ninja_run1, (45, 50))
 
-ninja_run2 = ninja.image_at((40, 43, 12, 16)).convert_alpha()
+ninja_run2 = ninja_sheet.image_at((40, 43, 12, 16)).convert_alpha()
 ninja_run2 = pygame.transform.scale(ninja_run2, (45, 50))
 
-ninja_run3 = ninja.image_at((41, 11, 12, 16)).convert_alpha()
+ninja_run3 = ninja_sheet.image_at((41, 11, 12, 16)).convert_alpha()
 ninja_run3 = pygame.transform.scale(ninja_run3, (45, 50))
 
-ninja_run4 = ninja.image_at((39, 75, 16, 16)).convert_alpha()
-ninja_run4 = pygame.transform.scale(ninja_run4, (45, 50))
+ninja_run4 = ninja_run2
 
+run_rt_list = [ninja_run1, ninja_run2, ninja_run3, ninja_run4]
+
+run_lt_list = [pygame.transform.flip(player, True, False) for player in run_rt_list]
 
 ###################################################################################
-
 def draw_grid(width, height, size):
 
     for x in range(1, width, size):
@@ -162,28 +176,41 @@ def draw_grid(width, height, size):
             rect = pygame.Rect(x, y, size, size)
             pygame.draw.rect(screen, BLACK, rect, 2)
 
-    # for i in range(1, width // size):
-    #     pygame.draw.rect(screen, WHITE, )
-
-
-
+player_delay = 1000
+player_run_prev = pygame.time.get_ticks()
 
 while True:
 
     keys = pygame.key.get_pressed()
 
     for event in pygame.event.get():
+        player_run_current = pygame.time.get_ticks()
+
+
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
 
-    screen.fill((WHITE))
+    screen.fill((YELLOW))
 
     draw_grid(screen_w, screen_h, block_size)
 
 
     # screen.blit(ninja_idle, (100, 100))
-    screen.blit(ninja_run4, (100, 46))
+    # screen.blit(ninja_run1, (50, 51))
+    # screen.blit(ninja_run2, (100, 51))
+    # screen.blit(ninja_run3, (150, 51))
+    # screen.blit(ninja_run4, (200, 51))
+    screen.blit(temple_ground, (50, 50))
+
+    # screen.blit(run_rt_list[0], (50, 51))
+    # screen.blit(run_lt_list[0], (55, 102))
+
+    # for player in run_rt_list:
+    # if player_run_current - player_run_prev > player_delay:
+    #     screen.blit(player, (50, 51))
+    #     # pygame.display.flip()
+
 
     pygame.display.flip()
     clock.tick(FPS)
