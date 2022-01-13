@@ -131,14 +131,33 @@ class player(pygame.sprite.Sprite):
 
 temple_sheet = SpriteSheet('Temple_spritesheet.png')
 
-# GROUND
 
-temple_ground = temple_sheet.image_at((289, 480, 32, 32)).convert_alpha()
+###############################################
+# GAME OBJECTS
+
+# GROUND
+temple_ground = temple_sheet.image_at((290, 480, 32, 32)).convert_alpha()
 temple_ground = pygame.transform.scale(temple_ground, (50, 50))
 
+# PLANTS
 
+tree_big =
+
+tree_small =
+
+# TEMPLE PLATFORMS
+platform_large = temple_sheet.image_at((256, 288, 64, 24)).convert_alpha()
+platform_large = pygame.transform.scale(platform_large, (100, 35))
+
+platform_small = pygame.transform.scale(platform_large, (60, 30))
+
+platform_long = temple_sheet.image_at((0, 320, 255, 21)).convert_alpha()
+platform_long = pygame.transform.scale(platform_long, (350, 30))
+
+
+
+##########################################
 # DEFINE EACH NINJA ANIMATION
-
 ninja_sheet = SpriteSheet('ninja-black-32x32.png')
 
 ninja_list = ninja_sheet.load_grid_images(6, 12, x_margin, x_pad, y_margin, y_pad)
@@ -168,16 +187,27 @@ run_rt_list = [ninja_run1, ninja_run2, ninja_run3, ninja_run4]
 
 run_lt_list = [pygame.transform.flip(player, True, False) for player in run_rt_list]
 
-###################################################################################
-def draw_grid(width, height, size):
 
-    for x in range(1, width, size):
-        for y in range(1, height, size):
-            rect = pygame.Rect(x, y, size, size)
-            pygame.draw.rect(screen, BLACK, rect, 2)
+
+# GAME BACKGROUND
+moon_bg = 'Moon-Mountain-BG.png'
+moon_bg = pygame.image.load(moon_bg).convert_alpha()
+
+
+
+
+###################################################################################
+# def draw_grid(width, height, size):
+
+#     for x in range(1, width, size):
+#         for y in range(1, height, size):
+#             rect = pygame.Rect(x, y, size, size)
+#             pygame.draw.rect(screen, BLACK, rect, 2)
 
 player_delay = 1000
 player_run_prev = pygame.time.get_ticks()
+
+
 
 while True:
 
@@ -191,25 +221,20 @@ while True:
             pygame.quit()
             sys.exit()
 
-    screen.fill((YELLOW))
+    screen.blit(moon_bg, (0,0))
 
-    draw_grid(screen_w, screen_h, block_size)
+# DRAW GROUND
+    for i in range(2):
+        for j in range(0, screen_w // block_size):
+            screen.blit(temple_ground, (j* block_size, screen_h - block_size * i))
 
 
-    # screen.blit(ninja_idle, (100, 100))
-    # screen.blit(ninja_run1, (50, 51))
-    # screen.blit(ninja_run2, (100, 51))
-    # screen.blit(ninja_run3, (150, 51))
-    # screen.blit(ninja_run4, (200, 51))
-    screen.blit(temple_ground, (50, 50))
+    screen.blit(platform_large, (200, 300))
+    screen.blit(platform_small, (500, 300))
+    screen.blit(platform_long, (300, 100))
 
-    # screen.blit(run_rt_list[0], (50, 51))
-    # screen.blit(run_lt_list[0], (55, 102))
+    # draw_grid(screen_w, screen_h, block_size)
 
-    # for player in run_rt_list:
-    # if player_run_current - player_run_prev > player_delay:
-    #     screen.blit(player, (50, 51))
-    #     # pygame.display.flip()
 
 
     pygame.display.flip()
