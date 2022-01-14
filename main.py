@@ -132,7 +132,8 @@ class player(pygame.sprite.Sprite):
 temple_sheet = SpriteSheet('Temple_spritesheet.png')
 
 
-###############################################
+############################################################################################
+############################################################################################
 # GAME OBJECTS
 
 # GROUND
@@ -141,9 +142,10 @@ temple_ground = pygame.transform.scale(temple_ground, (50, 50))
 
 # PLANTS
 
-tree_big =
+tree_big = temple_sheet.image_at((396, 296, 107, 109)).convert_alpha()
 
-tree_small =
+
+tree_small = temple_sheet.image_at((430, 199, 71, 82), -1)
 
 # TEMPLE PLATFORMS
 platform_large = temple_sheet.image_at((256, 288, 64, 24)).convert_alpha()
@@ -156,7 +158,8 @@ platform_long = pygame.transform.scale(platform_long, (350, 30))
 
 
 
-##########################################
+############################################################################################
+############################################################################################
 # DEFINE EACH NINJA ANIMATION
 ninja_sheet = SpriteSheet('ninja-black-32x32.png')
 
@@ -232,6 +235,8 @@ while True:
     screen.blit(platform_large, (200, 300))
     screen.blit(platform_small, (500, 300))
     screen.blit(platform_long, (300, 100))
+    screen.blit(tree_big, (100, 444))
+    screen.blit(tree_small, (100, 470))
 
     # draw_grid(screen_w, screen_h, block_size)
 
