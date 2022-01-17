@@ -1,4 +1,5 @@
 import pygame, sys
+import map_design as levels
 
 # SCREEN SETUP
 # SCREEN CONSTANTS
@@ -29,8 +30,6 @@ x_margin = 10
 y_margin = 11
 x_pad = 19
 y_pad = 17
-
-
 
 
 # SPRITE SHEET METHODS
@@ -132,6 +131,9 @@ class player(pygame.sprite.Sprite):
 temple_sheet = SpriteSheet('Temple_spritesheet.png')
 
 
+
+
+
 ############################################################################################
 ############################################################################################
 # GAME OBJECTS
@@ -144,8 +146,10 @@ temple_ground = pygame.transform.scale(temple_ground, (50, 50))
 
 tree_big = temple_sheet.image_at((396, 296, 107, 109)).convert_alpha()
 
+tree_small = temple_sheet.image_at((430, 199, 71, 82), -1).convert_alpha()
 
-tree_small = temple_sheet.image_at((430, 199, 71, 82), -1)
+bush_small = temple_sheet.image_at((370, 268, 34, 20)).convert_alpha()
+bush_small = pygame.transform.scale(bush_small, (50, 30))
 
 # TEMPLE PLATFORMS
 platform_large = temple_sheet.image_at((256, 288, 64, 24)).convert_alpha()
@@ -211,6 +215,11 @@ player_delay = 1000
 player_run_prev = pygame.time.get_ticks()
 
 
+#########################################################################
+############################## MAP LAYOUT ###############################
+#########################################################################
+
+
 
 while True:
 
@@ -237,7 +246,8 @@ while True:
     screen.blit(platform_long, (300, 100))
     screen.blit(tree_big, (100, 444))
     screen.blit(tree_small, (100, 470))
-
+    screen.blit(ninja_idle, (50, 505))
+    screen.blit(bush_small, (400, 550))
     # draw_grid(screen_w, screen_h, block_size)
 
 
