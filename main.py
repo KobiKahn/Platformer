@@ -138,7 +138,6 @@ ninja_list = ninja_sheet.load_grid_images(6, 12, x_margin, x_pad, y_margin, y_pa
 # print(ninja_list)
 
 
-
 # IDLE
 ninja_idle = ninja_sheet.image_at((11, 11, 18, 16)).convert_alpha()
 ninja_idle = pygame.transform.scale(ninja_idle, (block_size, block_size))
@@ -214,7 +213,7 @@ class Level:
         tree_small = pygame.transform.scale(tree_small, (self.block_size * 1.5, self.block_size * 1.5))
 
         self.hedge_small = temple_sheet.image_at((370, 268, 34, 20)).convert_alpha()
-        self.hedge_small = pygame.transform.scale(self.hedge_small, (self.block_size, self.block_size / 2))
+        self.hedge_small = pygame.transform.scale(self.hedge_small, (self.block_size * 1.5, self.block_size))
 
 
         # TEMPLE PLATFORMS
@@ -290,12 +289,21 @@ class Level:
                     tile = (self.hedge_small, (image_rect))
                     self.tile_list.append(tile)
 
+                elif col =='d':
+                    image_rect = gate.get_rect()
+                    image_rect.x = x_val
+                    image_rect.y = y_val
+
+                    tile = (gate, (image_rect))
+                    self.tile_list.append(tile)
+
+
 
     def draw(self):
         for tile in self.tile_list:
 
             screen.blit(tile[0], tile[1])
-            # display.blit(self.hedge_small, (50, 50))
+
 
 level_1 = Level(levels.Level_1, block_size)
 
@@ -315,7 +323,7 @@ while True:
 
     screen.blit(moon_bg, (0,0))
 
-    draw_grid(screen_w, screen_h, block_size)
+    # draw_grid(screen_w, screen_h, block_size)
 
     level_1.draw()
 
