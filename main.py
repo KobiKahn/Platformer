@@ -189,6 +189,7 @@ class Level:
     def __init__(self, layout, block_size):
         self.layout = layout
         self.tile_list = []
+        self.tile_plants = []
         self.block_size = block_size
 
 
@@ -197,7 +198,7 @@ class Level:
 
     # GAME OBJECTS
         gate = gate_sheet.image_at((228, 372, 732, 541)).convert_alpha()
-        gate = pygame.transform.scale(gate, (self.block_size * 1.5, self.block_size * 1.5))
+        gate = pygame.transform.scale(gate, (self.block_size, self.block_size))
 
 
         # GROUND
@@ -210,7 +211,7 @@ class Level:
         tree_big = pygame.transform.scale(tree_big, (self.block_size * 2, self.block_size * 2))
 
         tree_small = temple_sheet.image_at((430, 199, 71, 82), -1).convert_alpha()
-        tree_small = pygame.transform.scale(tree_small, (self.block_size * 1.5, self.block_size * 1.5))
+        tree_small = pygame.transform.scale(tree_small, (self.block_size * 1.5, self.block_size * 2))
 
         self.hedge_small = temple_sheet.image_at((370, 268, 34, 20)).convert_alpha()
         self.hedge_small = pygame.transform.scale(self.hedge_small, (self.block_size * 1.5, self.block_size))
@@ -257,7 +258,7 @@ class Level:
                     tile = (platform_small, (image_rect))
                     self.tile_list.append(tile)
 
-                elif col == 'l':
+                elif col == 'L':
                     image_rect = platform_long.get_rect()
                     image_rect.x = x_val
                     image_rect.y = y_val
@@ -265,29 +266,6 @@ class Level:
                     tile = (platform_long, (image_rect))
                     self.tile_list.append(tile)
 
-                elif col == 'b':
-                    image_rect = tree_big.get_rect()
-                    image_rect.x = x_val
-                    image_rect.y = y_val
-
-                    tile = (tree_big, (image_rect))
-                    self.tile_list.append(tile)
-
-                elif col == 's':
-                    image_rect = tree_small.get_rect()
-                    image_rect.x = x_val
-                    image_rect.y = y_val
-
-                    tile = (tree_small, (image_rect))
-                    self.tile_list.append(tile)
-
-                elif col == 'h':
-                    image_rect = self.hedge_small.get_rect()
-                    image_rect.x = x_val
-                    image_rect.y = y_val
-
-                    tile = (self.hedge_small, (image_rect))
-                    self.tile_list.append(tile)
 
                 elif col =='d':
                     image_rect = gate.get_rect()
@@ -297,6 +275,29 @@ class Level:
                     tile = (gate, (image_rect))
                     self.tile_list.append(tile)
 
+                elif col == 'b':
+                    image_rect = tree_big.get_rect()
+                    image_rect.x = x_val
+                    image_rect.y = y_val
+
+                    tile = (tree_big, (image_rect))
+                    self.tile_plants.append(tile)
+
+                elif col == 's':
+                    image_rect = tree_small.get_rect()
+                    image_rect.x = x_val
+                    image_rect.y = y_val
+
+                    tile = (tree_small, (image_rect))
+                    self.tile_plants.append(tile)
+
+                elif col == 'h':
+                    image_rect = self.hedge_small.get_rect()
+                    image_rect.x = x_val
+                    image_rect.y = y_val
+
+                    tile = (self.hedge_small, (image_rect))
+                    self.tile_plants.append(tile)
 
 
     def draw(self):
@@ -304,9 +305,15 @@ class Level:
 
             screen.blit(tile[0], tile[1])
 
+    def draw_plants(self):
+
+        for tile in self.tile_plants:
+
+            screen.blit(tile[0], tile[1])
+
 
 level_1 = Level(levels.Level_1, block_size)
-
+level_1_plants = Level(levels.Level_1_plants, block_size)
 
 
 while True:
@@ -326,6 +333,7 @@ while True:
     # draw_grid(screen_w, screen_h, block_size)
 
     level_1.draw()
+    level_1_plants.draw_plants()
 
 
     pygame.display.flip()
