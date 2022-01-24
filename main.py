@@ -132,34 +132,53 @@ class player(pygame.sprite.Sprite):
 ############################################################################################
 ############################################################################################
 # DEFINE EACH NINJA ANIMATION
-ninja_sheet = SpriteSheet('ninja-black-32x32.png')
+ninja_sheet = SpriteSheet('SamuraiLight.png')
 
-ninja_list = ninja_sheet.load_grid_images(6, 12, x_margin, x_pad, y_margin, y_pad)
+# ninja_list = ninja_sheet.load_grid_images(6, 12, x_margin, x_pad, y_margin, y_pad)
 # print(ninja_list)
 
 
 # IDLE
-ninja_idle = ninja_sheet.image_at((11, 11, 18, 16)).convert_alpha()
+ninja_idle = pygame.image.load('idle.png').convert_alpha()
 ninja_idle = pygame.transform.scale(ninja_idle, (block_size, block_size))
 
 
 # RUNNING
 
-ninja_run1 = ninja_sheet.image_at((40, 107, 12, 16)).convert_alpha()
-ninja_run1 = pygame.transform.scale(ninja_run1, (block_size, block_size))
+ninja_run_rt_list_wrong = ninja_sheet.load_grid_images(1, 10, 56, 76, 1190, 0, 185, 270, -1)
+ninja_run_rt_list = []
+for player in ninja_run_rt_list_wrong:
+    player = pygame.transform.scale(player, (block_size, block_size))
+    ninja_run_rt_list.append(player)
 
-ninja_run2 = ninja_sheet.image_at((40, 43, 12, 16)).convert_alpha()
-ninja_run2 = pygame.transform.scale(ninja_run2, (block_size, block_size))
 
-ninja_run3 = ninja_sheet.image_at((41, 11, 12, 16)).convert_alpha()
-ninja_run3 = pygame.transform.scale(ninja_run3, (block_size, block_size))
+# print(ninja_run_rt_list)
 
-ninja_run4 = ninja_run2
+# ninja_run1 = pygame.image.load('run1.png').convert_alpha()
+# ninja_run1 = pygame.transform.scale(ninja_run1, (block_size, block_size))
 
-run_rt_list = [ninja_run1, ninja_run2, ninja_run3, ninja_run4]
-
-run_lt_list = [pygame.transform.flip(player, True, False) for player in run_rt_list]
-
+# ninja_run1 = ninja_sheet.image_at((60, 1190, 70, 275))
+# ninja_run1 = pygame.transform.scale(ninja_run1, (block_size, block_size))
+# ninja_run2 = pygame.image.load('run2.png').convert_alpha()
+# ninja_run3 = pygame.image.load('run3.png').convert_alpha()
+# ninja_run4 = pygame.image.load('run4.png').convert_alpha()
+# ninja_run5 = pygame.image.load('run5.png').convert_alpha()
+# ninja_run6 = pygame.image.load('run6.png').convert_alpha()
+# ninja_run7 = pygame.image.load('run7.png').convert_alpha()
+# ninja_run8 = pygame.image.load('run8.png').convert_alpha()
+# ninja_run9 = pygame.image.load('run9.png').convert_alpha()
+#
+# ninja_rt_list_wrong = [ninja_run1, ninja_run2, ninja_run3, ninja_run4, ninja_run5, ninja_run6, ninja_run7, ninja_run8, ninja_run9]
+#
+# ninja_rt_list = []
+#
+# for ninja in ninja_rt_list_wrong:
+#     ninja = pygame.transform.scale(ninja, (block_size, block_size))
+#
+#     ninja_rt_list.append(ninja)
+#
+#
+# ninja_lt_list = [pygame.transform.flip(player, True, False) for player in ninja_rt_list]
 
 
 # GAME BACKGROUND
@@ -330,11 +349,12 @@ while True:
 
     screen.blit(moon_bg, (0,0))
 
-    # draw_grid(screen_w, screen_h, block_size)
+    draw_grid(screen_w, screen_h, block_size)
 
     level_1.draw()
     level_1_plants.draw_plants()
 
+    screen.blit(ninja_run_rt_list[0], (50,50))
 
     pygame.display.flip()
     clock.tick(FPS)
