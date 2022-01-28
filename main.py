@@ -112,73 +112,145 @@ class SpriteSheet:
 
 # PLAYER CLASS
 class player(pygame.sprite.Sprite):
-    def __init__(self, picture_path, h_vel, v_vel):
-        self.image = pygame.image.load(picture_path).convert_alpha()
+    def __init__(self, picture_path, x, y):
+        self.ninja_sheet = SpriteSheet(picture_path)
+
+        self.last = pygame.time.get_ticks()
+        self.image_delay = 100
+        self.current_frame = 0
+
+        self.right = True
+        self.left = False
+
+        self.jumping = False
+
+
+
+        self.y_vel = 0
+
+
+        # IDLE
+        self.ninja_idle_rt = self.ninja_sheet.image_at((444, 49, 141, 229), -1)
+        self.ninja_idle_rt = pygame.transform.scale(self.ninja_idle_rt, (block_size, block_size * 1.25))
+        self.ninja_idle_lt = pygame.transform.flip(self.ninja_idle_rt, True, False)
+
+        self.image = self.ninja_idle_rt
         self.rect = self.image.get_rect()
 
-        self.h_vel = h_vel
-        self.v_vel = v_vel
+        self.rect.x = x
+        self.rect.y = y
 
-    def h_move(self):
-        self.rect.x += self.vel
+        # RUNNING ANIMATIONS
+        self.ninja_run_rt_list_wrong = self.ninja_sheet.load_grid_images(1, 10, 450, 60, 1026, 0, 155, 228, -1)
+        self.ninja_run_rt = []
 
-    def jump(self):
-        pass
+        # GET EACH RUN
+        self.ninja_run_rt_1 = self.ninja_sheet.image_at((450, 1026, 152, 221), -1)
+        self.ninja_run_rt.append(self.ninja_run_rt_1)
+
+        self.ninja_run_rt_2 = self.ninja_sheet.image_at((645, 795, 150, 222) -1)
+        self.ninja_run_rt.append(self.ninja_run_rt_2)
+
+        self.ninja_run_rt_3 = self.ninja_sheet.image_at((882, 1031, 142, 223) -1)
+        self.ninja_run_rt.append(self.ninja_run_rt_3)
+
+        self.ninja_run_rt_4 = self.ninja_sheet.image_at((1074, 1033, 138, 224) -1)
+        self.ninja_run_rt.append(self.ninja_run_rt_4)
 
 
+
+        for player in self.ninja_run_rt:
+            player = pygame.transform.scale(player, (block_size, block_size * 1.25))
+            self.ninja_run_rt.append(player)
+
+        self.ninja_run_lt = [pygame.transform.flip(player, True, False) for player in self.ninja_run_rt]
+
+        # HITTING ANIMATIONS
+        self.ninja_hit_rt_wrong = self.ninja_sheet.load_grid_images(1, 10, 440, 56, 545, 0, 136, 219, -1)
+        self.ninja_hit_rt = []
+        for player in self.ninja_hit_rt_wrong:
+            player = pygame.transform.scale(player, (block_size, block_size * 1.25))
+            self.ninja_hit_rt.append(player)
+        self.ninja_hit_lt = [pygame.transform.flip(player, True, False) for player in self.ninja_hit_rt]
+
+        # JUMPING ANIMATION
+        self.ninja_jump_rt_wrong = self.ninja_sheet.load_grid_images(1, 10, 437, 46, 1262, 0, 158, 213, -1)
+        self.ninja_jump_rt = []
+
+        for player in self.ninja_jump_rt_wrong:
+            player = pygame.transform.scale(player, (block_size, block_size * 1.25))
+            self.ninja_jump_rt.append(player)
+        self.ninja_jump_lt = [pygame.transform.flip(player, True, False) for player in self.ninja_jump_rt]
+
+
+
+    def update(self):
+        dx = 0
+        dy = 0
+
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_RIGHT]:
+            self.left = False
+            self.right = True
+
+            dx = 5
+
+            now = pygame.time.get_ticks()
+
+            if (now - self.last) >= self.image_delay:
+                self.last = now
+
+                if (self.current_frame + 1) < len(self.ninja_run_rt):
+                    self.current_frame += 1
+                else:
+                    self.current_frame = 0
+
+                self.image = self.ninja_run_rt[self.current_frame]
+
+        elif keys[pygame.K_LEFT]:
+            self.left = True
+            self.right = False
+
+            dx = -5
+
+            now = pygame.time.get_ticks()
+
+            if (now - self.last) >= self.image_delay:
+                self.last = now
+
+                if (self.current_frame + 1) < len(self.ninja_run_lt):
+                    self.current_frame += 1
+                else:
+                    self.current_frame = 0
+
+                self.image = self.ninja_run_lt[self.current_frame]
+
+        else:
+            # print(self.current_frame)
+            self.current_frame = 0
+
+            dx = 0
+
+            if self.right:
+                self.image = self.ninja_idle_rt
+
+            elif self.left:
+                self.image = self.ninja_idle_lt
+
+
+        # UPDATE POSITION AND DISPLAY IT
+        self.rect.x += dx
+        self.rect.y += dy
+
+
+        screen.blit(self.image, self.rect)
 
 
 
 ############################################################################################
 ############################################################################################
-# DEFINE EACH NINJA ANIMATION
-ninja_sheet = SpriteSheet('SamuraiLight.png')
 
-# ninja_list = ninja_sheet.load_grid_images(6, 12, x_margin, x_pad, y_margin, y_pad)
-# print(ninja_list)
-
-
-# IDLE
-ninja_idle_rt = ninja_sheet.image_at((444, 49, 141, 229), -1)
-ninja_idle_rt = pygame.transform.scale(ninja_idle_rt, (block_size, block_size * 1.25))
-
-ninja_idle_lt = pygame.transform.flip(ninja_idle_rt, True, False)
-
-# RUNNING ANIMATIONS
-
-ninja_run_rt_list_wrong = ninja_sheet.load_grid_images(1, 10, 450, 72, 1026, 0, 142, 228, -1)
-ninja_run_rt_list = []
-
-for player in ninja_run_rt_list_wrong:
-    player = pygame.transform.scale(player, (block_size, block_size * 1.25))
-    ninja_run_rt_list.append(player)
-
-ninja_run_lt_list = [[pygame.transform.flip(player, True, False) for player in ninja_run_rt_list]]
-
-
-# HITTING ANIMATIONS
-
-ninja_hit_rt_wrong = ninja_sheet.load_grid_images(1, 10, 440, 56, 545, 0, 136, 219, -1)
-ninja_hit_rt = []
-
-for player in ninja_hit_rt_wrong:
-    player = pygame.transform.scale(player, (block_size, block_size * 1.25))
-    ninja_hit_rt.append(player)
-
-ninja_hit_lt = [[pygame.transform.flip(player, True, False) for player in ninja_hit_rt]]
-
-
-# JUMPING ANIMATION
-
-ninja_jump_rt_wrong = ninja_sheet.load_grid_images(1, 10, 437, 46, 1262, 0, 158, 213, -1)
-
-ninja_jump_rt = []
-
-for player in ninja_jump_rt_wrong:
-    player = pygame.transform.scale(player, (block_size, block_size * 1.25))
-    ninja_jump_rt.append(player)
-
-ninja_jump_lt = [[pygame.transform.flip(player, True, False) for player in ninja_jump_rt]]
 
 # GAME BACKGROUND
 moon_bg = 'Moon-Mountain-BG.png'
@@ -195,7 +267,7 @@ def draw_grid(width, height, size):
             pygame.draw.rect(screen, BLACK, rect, 2)
 
 player_delay = 1000
-player_run_prev = pygame.time.get_ticks()
+
 
 
 #########################################################################
@@ -332,6 +404,7 @@ class Level:
 level_1 = Level(levels.Level_1, block_size)
 level_1_plants = Level(levels.Level_1_plants, block_size)
 
+ninja = player('SamuraiLight.png', 100, 490)
 
 while True:
 
@@ -347,16 +420,14 @@ while True:
 
     screen.blit(moon_bg, (0,0))
 
-    draw_grid(screen_w, screen_h, block_size)
+    # draw_grid(screen_w, screen_h, block_size)
 
     level_1.draw()
     level_1_plants.draw_plants()
 
-    # screen.blit(ninja_run_lt_list[0], (50,490))
-    # screen.blit(ninja_hit_rt[5], (50, 490))
-    # screen.blit(ninja_idle_rt, (50, 490))
+    ninja.update()
 
-    # screen.blit(ninja_jump_rt[0], (50, 490))
+
 
     pygame.display.flip()
     clock.tick(FPS)
