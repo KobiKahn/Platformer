@@ -175,6 +175,9 @@ class player(pygame.sprite.Sprite):
         self.ninja_run_rt_9 = self.ninja_sheet.image_at((1998, 1031, 141, 224), - 1)
         self.ninja_run_rt_wrong.append(self.ninja_run_rt_9)
 
+        self.ninja_run_rt_10 = self.ninja_idle_rt
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_10)
+
         for player in self.ninja_run_rt_wrong:
             player = pygame.transform.scale(player, (block_size, block_size * 1.25))
             self.ninja_run_rt.append(player)
@@ -182,20 +185,83 @@ class player(pygame.sprite.Sprite):
         self.ninja_run_lt = [pygame.transform.flip(player, True, False) for player in self.ninja_run_rt]
 
         # HITTING ANIMATIONS
-        self.ninja_hit_rt_wrong = self.ninja_sheet.load_grid_images(1, 10, 440, 56, 545, 0, 136, 219, -1)
+        self.ninja_hit_rt_wrong = self.ninja_sheet.load_grid_images(1, 10, 445, 56, 515, 0, 140, 222, -1)
         self.ninja_hit_rt = []
+
+        self.ninja_hit_rt_1 = self.ninja_sheet.image_at((445, 547, 140, 222), -1)
+        self.ninja_hit_rt_wrong.append(self.ninja_hit_rt_1)
+
+        self.ninja_hit_rt_2 = self.ninja_sheet.image_at((639, 554, 161, 214), -1)
+        self.ninja_hit_rt_wrong.append(self.ninja_hit_rt_2)
+
+        self.ninja_hit_rt_3 = self.ninja_sheet.image_at((800, 555, 155, 210), -1)
+        self.ninja_hit_rt_wrong.append(self.ninja_hit_rt_3)
+
+        self.ninja_hit_rt_4 = self.ninja_sheet.image_at((990, 559, 173, 206), -1)
+        self.ninja_hit_rt_wrong.append(self.ninja_hit_rt_4)
+
+        self.ninja_hit_rt_5 = self.ninja_sheet.image_at((1181, 554, 179, 213), -1)
+        self.ninja_hit_rt_wrong.append(self.ninja_hit_rt_5)
+
+        self.ninja_hit_rt_6 = self.ninja_sheet.image_at((1379, 539, 149, 230), -1)
+        self.ninja_hit_rt_wrong.append(self.ninja_hit_rt_6)
+
+        self.ninja_hit_rt_7 = self.ninja_sheet.image_at((1579, 539, 147, 256), -1)
+        self.ninja_hit_rt_wrong.append(self.ninja_hit_rt_7)
+
+        self.ninja_hit_rt_8 = self.ninja_sheet.image_at((1757, 548, 146, 257), -1)
+        self.ninja_hit_rt_wrong.append(self.ninja_hit_rt_8)
+
+        self.ninja_hit_rt_9 = self.ninja_sheet.image_at((1949, 544, 132, 241), -1)
+        self.ninja_hit_rt_wrong.append(self.ninja_hit_rt_9)
+
+        self.ninja_hit_rt_10 = self.ninja_idle_rt
+        self.ninja_hit_rt_wrong.append(self.ninja_hit_rt_10)
+
         for player in self.ninja_hit_rt_wrong:
             player = pygame.transform.scale(player, (block_size, block_size * 1.25))
             self.ninja_hit_rt.append(player)
+
         self.ninja_hit_lt = [pygame.transform.flip(player, True, False) for player in self.ninja_hit_rt]
 
         # JUMPING ANIMATION
         self.ninja_jump_rt_wrong = self.ninja_sheet.load_grid_images(1, 10, 437, 46, 1262, 0, 158, 213, -1)
         self.ninja_jump_rt = []
 
+        self.ninja_jump_rt_1 = self.ninja_idle_rt
+        self.ninja_jump_rt_wrong.append(self.ninja_jump_rt_1)
+
+        self.ninja_jump_rt_2 = self.ninja_sheet.image_at((636, 1262, 159, 216), -1)
+        self.ninja_jump_rt_wrong.append(self.ninja_jump_rt_2)
+
+        self.ninja_jump_rt_3 = self.ninja_sheet.image_at((827, 1262, 168, 219), -1)
+        self.ninja_jump_rt_wrong.append(self.ninja_jump_rt_3)
+
+        self.ninja_jump_rt_4 = self.ninja_sheet.image_at((1031, 1265, 176, 218), -1)
+        self.ninja_jump_rt_wrong.append(self.ninja_jump_rt_4)
+
+        self.ninja_jump_rt_5 = self.ninja_sheet.image_at((1242, 1266, 176, 216), -1)
+        self.ninja_jump_rt_wrong.append(self.ninja_jump_rt_5)
+
+        self.ninja_jump_rt_6 = self.ninja_jump_rt_5
+        self.ninja_jump_rt_wrong.append(self.ninja_jump_rt_6)
+
+        self.ninja_jump_rt_7 = self.ninja_sheet.image_at((1631, 1265, 176, 215), -1)
+        self.ninja_jump_rt_wrong.append(self.ninja_jump_rt_7)
+
+        self.ninja_jump_rt_8 = self.ninja_sheet.image_at((1832, 1263, 170, 216), -1)
+        self.ninja_jump_rt_wrong.append(self.ninja_jump_rt_8)
+
+        self.ninja_jump_rt_9 = self.ninja_sheet.image_at((2042, 1263, 158, 216), -1)
+        self.ninja_jump_rt_wrong.append(self.ninja_jump_rt_9)
+
+        self.ninja_jump_rt_10 = self.ninja_idle_rt
+        self.ninja_jump_rt_wrong.append(self.ninja_jump_rt_10)
+
         for player in self.ninja_jump_rt_wrong:
             player = pygame.transform.scale(player, (block_size, block_size * 1.25))
             self.ninja_jump_rt.append(player)
+
         self.ninja_jump_lt = [pygame.transform.flip(player, True, False) for player in self.ninja_jump_rt]
 
 
