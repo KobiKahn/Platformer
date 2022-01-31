@@ -140,26 +140,42 @@ class player(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
+
         # RUNNING ANIMATIONS
-        self.ninja_run_rt_list_wrong = self.ninja_sheet.load_grid_images(1, 10, 450, 60, 1026, 0, 155, 228, -1)
+        # self.ninja_run_rt_list_wrong = self.ninja_sheet.load_grid_images(1, 10, 450, 60, 1026, 0, 155, 228, -1)
+        self.ninja_run_rt_wrong = []
         self.ninja_run_rt = []
+
 
         # GET EACH RUN
         self.ninja_run_rt_1 = self.ninja_sheet.image_at((450, 1026, 152, 221), -1)
-        self.ninja_run_rt.append(self.ninja_run_rt_1)
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_1)
 
-        self.ninja_run_rt_2 = self.ninja_sheet.image_at((645, 795, 150, 222) -1)
-        self.ninja_run_rt.append(self.ninja_run_rt_2)
+        self.ninja_run_rt_2 = self.ninja_sheet.image_at((645, 795, 150, 222), -1)
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_2)
 
-        self.ninja_run_rt_3 = self.ninja_sheet.image_at((882, 1031, 142, 223) -1)
-        self.ninja_run_rt.append(self.ninja_run_rt_3)
+        self.ninja_run_rt_3 = self.ninja_sheet.image_at((882, 1031, 142, 223), -1)
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_3)
 
-        self.ninja_run_rt_4 = self.ninja_sheet.image_at((1074, 1033, 138, 224) -1)
-        self.ninja_run_rt.append(self.ninja_run_rt_4)
+        self.ninja_run_rt_4 = self.ninja_sheet.image_at((1074, 1033, 138, 224), -1)
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_4)
 
+        self.ninja_run_rt_5 = self.ninja_sheet.image_at((1260, 1035, 139, 226), - 1)
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_5)
 
+        self.ninja_run_rt_6 = self.ninja_sheet.image_at((1431, 1034, 141, 228), - 1)
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_6)
 
-        for player in self.ninja_run_rt:
+        self.ninja_run_rt_7 = self.ninja_sheet.image_at((1616, 1033, 139, 224), - 1)
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_7)
+
+        self.ninja_run_rt_8 = self.ninja_sheet.image_at((1809, 1032, 141, 224), - 1)
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_8)
+
+        self.ninja_run_rt_9 = self.ninja_sheet.image_at((1998, 1031, 141, 224), - 1)
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_9)
+
+        for player in self.ninja_run_rt_wrong:
             player = pygame.transform.scale(player, (block_size, block_size * 1.25))
             self.ninja_run_rt.append(player)
 
