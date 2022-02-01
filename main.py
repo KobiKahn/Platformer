@@ -112,7 +112,10 @@ class SpriteSheet:
 
 # PLAYER CLASS
 class player(pygame.sprite.Sprite):
-    def __init__(self, picture_path, x, y):
+    def __init__(self, picture_path, x, y, tile_set):
+
+        self.tile_set = tile_set
+
         self.ninja_sheet = SpriteSheet(picture_path)
 
         self.last = pygame.time.get_ticks()
@@ -123,7 +126,7 @@ class player(pygame.sprite.Sprite):
         self.left = False
 
         self.jumping = False
-
+        self.falling = False
 
 
         self.y_vel = 0
@@ -135,10 +138,10 @@ class player(pygame.sprite.Sprite):
         self.ninja_idle_lt = pygame.transform.flip(self.ninja_idle_rt, True, False)
 
         self.image = self.ninja_idle_rt
-        self.rect = self.image.get_rect()
+        self.image_rect = self.image.get_rect()
 
-        self.rect.x = x
-        self.rect.y = y
+        self.image_rect.x = x
+        self.image_rect.y = y
 
 
         # RUNNING ANIMATIONS
@@ -308,6 +311,48 @@ class player(pygame.sprite.Sprite):
 
                 self.image = self.ninja_run_lt[self.current_frame]
 
+
+        elif keys[pygame.K_UP] and not self.jumping and not self.falling:
+            dy = -2 * block_size
+            self.jumping = True
+
+        if not keys[pygame.K_UP]:
+            self.jumping = False
+
+        self.y_vel += 1
+
+        if self.y_vel < 0:
+            self.jumping = True
+            self.falling = False
+
+        else:
+            self.jumping = False
+            self.falling = True
+
+        if self.y_vel >= 15:
+            self.y_vel = 15
+
+        dy += self.y_vel
+
+        for tile in self.tile_set:
+
+            if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
+                dx = 0
+
+            if tile[1].colliderect(self.image_rect.x, self.image_rect.y + dy, self.image_rect.width, self.image_rect.height):
+
+                if self.jumping:
+                    dy = tile[1].bottom - self.image_rect.top
+                    self.y_vel = 0
+                    self.falling = True
+                    self.jumping = False
+
+                elif self.falling:
+                    dy = tile[1].top - self.image_rect.bottom
+                    self.y_vel = 0
+                    self.falling = False
+
+
         else:
             # print(self.current_frame)
             self.current_frame = 0
@@ -322,33 +367,19 @@ class player(pygame.sprite.Sprite):
 
 
         # UPDATE POSITION AND DISPLAY IT
-        self.rect.x += dx
-        self.rect.y += dy
+        self.image_rect.x += dx
+        self.image_rect.y += dy
 
 
-        screen.blit(self.image, self.rect)
+        if self.image_rect.left <= block_size:
+            self.image_rect.left = block_size
 
+        self.draw()
 
+    def draw(self):
+        screen.blit(self.image, self.image_rect)
+        pygame.draw.rect(screen, (255,255,255), self.image_rect, 2)
 
-############################################################################################
-############################################################################################
-
-
-# GAME BACKGROUND
-moon_bg = 'Moon-Mountain-BG.png'
-moon_bg = pygame.image.load(moon_bg).convert_alpha()
-
-
-
-###################################################################################
-def draw_grid(width, height, size):
-
-    for x in range(1, width, size):
-        for y in range(1, height, size):
-            rect = pygame.Rect(x, y, size, size)
-            pygame.draw.rect(screen, BLACK, rect, 2)
-
-player_delay = 1000
 
 
 
@@ -368,98 +399,98 @@ class Level:
         gate_sheet = SpriteSheet('Japan_Gate.png')
 
     # GAME OBJECTS
-        gate = gate_sheet.image_at((228, 372, 732, 541)).convert_alpha()
-        gate = pygame.transform.scale(gate, (self.block_size, self.block_size))
+        self.gate = gate_sheet.image_at((228, 372, 732, 541)).convert_alpha()
+        self.gate = pygame.transform.scale(self.gate, (self.block_size, self.block_size))
 
 
         # GROUND
-        temple_ground = temple_sheet.image_at((290, 480, 32, 32)).convert_alpha()
-        temple_ground = pygame.transform.scale(temple_ground, (self.block_size, self.block_size))
+        self.temple_ground = temple_sheet.image_at((290, 480, 32, 32)).convert_alpha()
+        self.temple_ground = pygame.transform.scale(self.temple_ground, (self.block_size, self.block_size))
 
 
         # PLANTS
-        tree_big = temple_sheet.image_at((396, 296, 107, 109)).convert_alpha()
-        tree_big = pygame.transform.scale(tree_big, (self.block_size * 2, self.block_size * 2))
+        self.tree_big = temple_sheet.image_at((396, 296, 107, 109)).convert_alpha()
+        self.tree_big = pygame.transform.scale(self.tree_big, (self.block_size * 2, self.block_size * 2))
 
-        tree_small = temple_sheet.image_at((430, 199, 71, 82), -1).convert_alpha()
-        tree_small = pygame.transform.scale(tree_small, (self.block_size * 1.5, self.block_size * 2))
+        self.tree_small = temple_sheet.image_at((430, 199, 71, 82), -1).convert_alpha()
+        self.tree_small = pygame.transform.scale(self.tree_small, (self.block_size * 1.5, self.block_size * 2))
 
         self.hedge_small = temple_sheet.image_at((370, 268, 34, 20)).convert_alpha()
         self.hedge_small = pygame.transform.scale(self.hedge_small, (self.block_size * 1.5, self.block_size))
 
 
         # TEMPLE PLATFORMS
-        platform_big = temple_sheet.image_at((256, 288, 64, 24)).convert_alpha()
-        platform_big = pygame.transform.scale(platform_big, (self.block_size * 2, self.block_size))
+        self.platform_big = temple_sheet.image_at((256, 288, 64, 24)).convert_alpha()
+        self.platform_big = pygame.transform.scale(self.platform_big, (self.block_size * 2, self.block_size))
 
-        platform_small = pygame.transform.scale(platform_big, (self.block_size, self.block_size / 1.5))
+        self.platform_small = pygame.transform.scale(self.platform_big, (self.block_size, self.block_size / 1.5))
 
-        platform_long = temple_sheet.image_at((0, 320, 255, 21)).convert_alpha()
-        platform_long = pygame.transform.scale(platform_long, (350, 30))
+        self.platform_long = temple_sheet.image_at((0, 320, 255, 21)).convert_alpha()
+        self.platform_long = pygame.transform.scale(self.platform_long, (350, 30))
 
 
-
+    def make_layout(self):
         for i, row in enumerate(self.layout):
             for j, col in enumerate(row):
                 x_val = j * self.block_size
                 y_val = i * self.block_size
 
                 if col == 'G':
-                    image_rect = temple_ground.get_rect()
+                    image_rect = self.temple_ground.get_rect()
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (temple_ground, (image_rect))
+                    tile = (self.temple_ground, (image_rect))
                     self.tile_list.append(tile)
 
                 elif col == 'B':
-                    image_rect = platform_big.get_rect()
+                    image_rect = self.platform_big.get_rect()
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (platform_big, (image_rect))
+                    tile = (self.platform_big, (image_rect))
                     self.tile_list.append(tile)
 
 
                 elif col == 'S':
-                    image_rect = platform_small.get_rect()
+                    image_rect = self.platform_small.get_rect()
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (platform_small, (image_rect))
+                    tile = (self.platform_small, (image_rect))
                     self.tile_list.append(tile)
 
                 elif col == 'L':
-                    image_rect = platform_long.get_rect()
+                    image_rect = self.platform_long.get_rect()
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (platform_long, (image_rect))
+                    tile = (self.platform_long, (image_rect))
                     self.tile_list.append(tile)
 
 
                 elif col =='d':
-                    image_rect = gate.get_rect()
+                    image_rect = self.gate.get_rect()
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (gate, (image_rect))
+                    tile = (self.gate, (image_rect))
                     self.tile_list.append(tile)
 
                 elif col == 'b':
-                    image_rect = tree_big.get_rect()
+                    image_rect = self.tree_big.get_rect()
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (tree_big, (image_rect))
+                    tile = (self.tree_big, (image_rect))
                     self.tile_plants.append(tile)
 
                 elif col == 's':
-                    image_rect = tree_small.get_rect()
+                    image_rect = self.tree_small.get_rect()
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (tree_small, (image_rect))
+                    tile = (self.tree_small, (image_rect))
                     self.tile_plants.append(tile)
 
                 elif col == 'h':
@@ -469,6 +500,8 @@ class Level:
 
                     tile = (self.hedge_small, (image_rect))
                     self.tile_plants.append(tile)
+
+        return(self.tile_list)
 
 
     def draw(self):
@@ -483,10 +516,33 @@ class Level:
             screen.blit(tile[0], tile[1])
 
 
-level_1 = Level(levels.Level_1, block_size)
-level_1_plants = Level(levels.Level_1_plants, block_size)
 
-ninja = player('SamuraiLight.png', 100, 490)
+def draw_grid(width, height, size):
+
+    for x in range(1, width, size):
+        for y in range(1, height, size):
+            rect = pygame.Rect(x, y, size, size)
+            pygame.draw.rect(screen, BLACK, rect, 2)
+
+
+
+level_1 = Level(levels.Level_1, block_size)
+layout_list = level_1.make_layout()
+
+level_1_plants = Level(levels.Level_1_plants, block_size)
+plant_list = level_1_plants.make_layout()
+
+ninja = player('SamuraiLight.png', 100, 490, layout_list)
+
+
+# GAME BACKGROUND
+moon_bg = 'Moon-Mountain-BG.png'
+moon_bg = pygame.image.load(moon_bg).convert_alpha()
+
+
+
+###################################################################################
+
 
 while True:
 
