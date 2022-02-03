@@ -311,12 +311,25 @@ class player(pygame.sprite.Sprite):
 
                 self.image = self.ninja_run_lt[self.current_frame]
 
+        else:
+            # print(self.current_frame)
+            self.current_frame = 0
 
-        elif keys[pygame.K_UP] and not self.jumping and not self.falling:
-            dy = -2 * block_size
+            dx = 0
+
+            if self.right:
+                self.image = self.ninja_idle_rt
+
+            elif self.left:
+                self.image = self.ninja_idle_lt
+
+
+        if keys[pygame.K_UP] and not self.jumping and not self.falling:
+            dy = -55
             self.jumping = True
 
-        if not keys[pygame.K_UP]:
+
+        elif not keys[pygame.K_UP]:
             self.jumping = False
 
         self.y_vel += 1
@@ -329,8 +342,9 @@ class player(pygame.sprite.Sprite):
             self.jumping = False
             self.falling = True
 
-        if self.y_vel >= 15:
-            self.y_vel = 15
+
+        if self.y_vel >= 10:
+            self.y_vel = 10
 
         dy += self.y_vel
 
@@ -351,19 +365,7 @@ class player(pygame.sprite.Sprite):
                     dy = tile[1].top - self.image_rect.bottom
                     self.y_vel = 0
                     self.falling = False
-
-
-        else:
-            # print(self.current_frame)
-            self.current_frame = 0
-
-            dx = 0
-
-            if self.right:
-                self.image = self.ninja_idle_rt
-
-            elif self.left:
-                self.image = self.ninja_idle_lt
+                    self.jumping = False
 
 
         # UPDATE POSITION AND DISPLAY IT
@@ -371,8 +373,15 @@ class player(pygame.sprite.Sprite):
         self.image_rect.y += dy
 
 
-        if self.image_rect.left <= block_size:
-            self.image_rect.left = block_size
+        if dy == 0 and dx == 0:
+            self.jumping = False
+            self.falling = False
+
+        if self.image_rect.left <= 0:
+            self.image_rect.left = 0
+
+        elif self.image_rect.right >= screen_w:
+            self.image_rect.right = screen_w
 
         self.draw()
 
