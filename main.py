@@ -126,11 +126,9 @@ class player(pygame.sprite.Sprite):
         self.left = False
 
         self.jumping = False
-        self.falling = False
-
+        self.jump_count = 10
 
         self.y_vel = 0
-
 
         # IDLE
         self.ninja_idle_rt = self.ninja_sheet.image_at((444, 49, 141, 229), -1)
@@ -314,7 +312,6 @@ class player(pygame.sprite.Sprite):
         else:
             # print(self.current_frame)
             self.current_frame = 0
-
             dx = 0
 
             if self.right:
@@ -323,49 +320,47 @@ class player(pygame.sprite.Sprite):
             elif self.left:
                 self.image = self.ninja_idle_lt
 
+        if not self.jumping:
+            if keys[pygame.K_UP]:
+                self.jumping = True
 
-        if keys[pygame.K_UP] and not self.jumping and not self.falling:
-            dy = -55
-            self.jumping = True
-
-
-        elif not keys[pygame.K_UP]:
-            self.jumping = False
-
-        self.y_vel += 1
-
-        if self.y_vel < 0:
-            self.jumping = True
-            self.falling = False
 
         else:
-            self.jumping = False
-            self.falling = True
+            self.jumping = True
 
+            if self.jump_count >= -10:
+                neg = 1
 
-        if self.y_vel >= 10:
-            self.y_vel = 10
+                if self.jump_count < 0:
+                    neg = -1
 
-        dy += self.y_vel
+                dy -= int(((self.jump_count ** 2) * .5 * neg))
+                # print(dy, self.image_rect.y)
+                self.jump_count -= 1
+
+            else:
+                self.jumping = False
+                self.jump_count = 10
+
 
         for tile in self.tile_set:
 
-            if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
+            if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y - 10, self.image_rect.width, self.image_rect.height):
                 dx = 0
 
-            if tile[1].colliderect(self.image_rect.x, self.image_rect.y + dy, self.image_rect.width, self.image_rect.height):
+            if tile[1].colliderect(self.image_rect.x, self.image_rect.y - 10 + dy, self.image_rect.width, self.image_rect.height):
 
                 if self.jumping:
                     dy = tile[1].bottom - self.image_rect.top
-                    self.y_vel = 0
-                    self.falling = True
+                    # print(dy, self.jump_count)
                     self.jumping = False
 
-                elif self.falling:
+                else:
                     dy = tile[1].top - self.image_rect.bottom
-                    self.y_vel = 0
-                    self.falling = False
+                    # print(dy, self.jump_count, 'hi')
                     self.jumping = False
+            # elif self.jumping == False:
+            #     dy += 1
 
 
         # UPDATE POSITION AND DISPLAY IT
@@ -373,9 +368,6 @@ class player(pygame.sprite.Sprite):
         self.image_rect.y += dy
 
 
-        if dy == 0 and dx == 0:
-            self.jumping = False
-            self.falling = False
 
         if self.image_rect.left <= 0:
             self.image_rect.left = 0
