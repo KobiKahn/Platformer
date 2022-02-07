@@ -125,10 +125,12 @@ class player(pygame.sprite.Sprite):
         self.right = True
         self.left = False
 
+        self.falling = False
         self.jumping = False
         self.jump_count = 10
 
-        self.y_vel = 0
+        self.gravity = 5
+
 
         # IDLE
         self.ninja_idle_rt = self.ninja_sheet.image_at((444, 49, 141, 229), -1)
@@ -266,12 +268,12 @@ class player(pygame.sprite.Sprite):
         self.ninja_jump_lt = [pygame.transform.flip(player, True, False) for player in self.ninja_jump_rt]
 
 
-
     def update(self):
         dx = 0
         dy = 0
 
         keys = pygame.key.get_pressed()
+
 
         if keys[pygame.K_RIGHT]:
             self.left = False
@@ -320,14 +322,8 @@ class player(pygame.sprite.Sprite):
             elif self.left:
                 self.image = self.ninja_idle_lt
 
-        if not self.jumping:
-            if keys[pygame.K_UP]:
-                self.jumping = True
-
-
-        else:
+        if keys[pygame.K_UP] and not self.falling:
             self.jumping = True
-
             if self.jump_count >= -10:
                 neg = 1
 
@@ -335,12 +331,15 @@ class player(pygame.sprite.Sprite):
                     neg = -1
 
                 dy -= int(((self.jump_count ** 2) * .5 * neg))
-                # print(dy, self.image_rect.y)
                 self.jump_count -= 1
 
             else:
                 self.jumping = False
                 self.jump_count = 10
+
+        if self.falling:
+            self.jumping = False
+            dy += self.gravity
 
 
         for tile in self.tile_set:
@@ -350,23 +349,29 @@ class player(pygame.sprite.Sprite):
 
             if tile[1].colliderect(self.image_rect.x, self.image_rect.y - 10 + dy, self.image_rect.width, self.image_rect.height):
 
-                if self.jumping:
+                if dy < 0:
+                    # self.image_rect.bottom = tile[1].top
                     dy = tile[1].bottom - self.image_rect.top
-                    # print(dy, self.jump_count)
-                    self.jumping = False
 
-                else:
+                    self.jumping = False
+                    self.falling = True
+
+
+                elif dy >= 0:
                     dy = tile[1].top - self.image_rect.bottom
-                    # print(dy, self.jump_count, 'hi')
-                    self.jumping = False
-            # elif self.jumping == False:
-            #     dy += 1
 
+                    # dy = 0
+
+                    self.jumping = False
+                    self.falling = False
+
+
+        # if dy == 0:
+        #     self.falling = False
 
         # UPDATE POSITION AND DISPLAY IT
         self.image_rect.x += dx
         self.image_rect.y += dy
-
 
 
         if self.image_rect.left <= 0:
@@ -570,26 +575,4 @@ while True:
 
     pygame.display.flip()
     clock.tick(FPS)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
