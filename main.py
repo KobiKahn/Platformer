@@ -128,7 +128,6 @@ class player(pygame.sprite.Sprite):
         self.falling = False
         self.jumping = False
         self.jump_count = 10
-
         self.gravity = 5
 
 
@@ -322,7 +321,8 @@ class player(pygame.sprite.Sprite):
             elif self.left:
                 self.image = self.ninja_idle_lt
 
-        if keys[pygame.K_UP] and not self.falling:
+        if keys[pygame.K_UP] and not self.falling and not self.jumping:
+            self.falling = False
             self.jumping = True
             if self.jump_count >= -10:
                 neg = 1
@@ -335,44 +335,39 @@ class player(pygame.sprite.Sprite):
 
             else:
                 self.jumping = False
+                # self.falling = True
                 self.jump_count = 10
 
         if self.falling:
-            self.jumping = False
             dy += self.gravity
 
 
+# COLLISION DETECTION
         for tile in self.tile_set:
-
-            if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y - 10, self.image_rect.width, self.image_rect.height):
+            if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
                 dx = 0
 
-            if tile[1].colliderect(self.image_rect.x, self.image_rect.y - 10 + dy, self.image_rect.width, self.image_rect.height):
-
+            if tile[1].colliderect(self.image_rect.x, self.image_rect.y + self.gravity, self.image_rect.width, self.image_rect.height):
                 if dy < 0:
-                    # self.image_rect.bottom = tile[1].top
                     dy = tile[1].bottom - self.image_rect.top
-
-                    self.jumping = False
-                    self.falling = True
-
-
-                elif dy >= 0:
-                    dy = tile[1].top - self.image_rect.bottom
-
-                    # dy = 0
-
                     self.jumping = False
                     self.falling = False
 
 
-        # if dy == 0:
-        #     self.falling = False
+                elif dy >= 0:
+                    dy = tile[1].top - self.image_rect.bottom
+                    self.jumping = False
+
+
+
 
         # UPDATE POSITION AND DISPLAY IT
         self.image_rect.x += dx
         self.image_rect.y += dy
 
+
+        if self.image_rect.top >= 495:
+            self.image_rect.top = 495
 
         if self.image_rect.left <= 0:
             self.image_rect.left = 0
@@ -538,7 +533,7 @@ layout_list = level_1.make_layout()
 level_1_plants = Level(levels.Level_1_plants, block_size)
 plant_list = level_1_plants.make_layout()
 
-ninja = player('SamuraiLight.png', 100, 490, layout_list)
+ninja = player('SamuraiLight.png', 100, 495, layout_list)
 
 
 # GAME BACKGROUND
