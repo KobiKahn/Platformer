@@ -128,7 +128,7 @@ class player(pygame.sprite.Sprite):
         self.falling = False
         self.jumping = False
         self.jump_count = 10
-        self.gravity = 5
+        self.gravity = 3
 
 
         # IDLE
@@ -273,7 +273,7 @@ class player(pygame.sprite.Sprite):
 
         keys = pygame.key.get_pressed()
 
-
+        # RUN RIGHT
         if keys[pygame.K_RIGHT]:
             self.left = False
             self.right = True
@@ -291,7 +291,7 @@ class player(pygame.sprite.Sprite):
                     self.current_frame = 0
 
                 self.image = self.ninja_run_rt[self.current_frame]
-
+        # RUN LEFT
         elif keys[pygame.K_LEFT]:
             self.left = True
             self.right = False
@@ -309,7 +309,7 @@ class player(pygame.sprite.Sprite):
                     self.current_frame = 0
 
                 self.image = self.ninja_run_lt[self.current_frame]
-
+        # IDLE
         else:
             # print(self.current_frame)
             self.current_frame = 0
@@ -321,25 +321,35 @@ class player(pygame.sprite.Sprite):
             elif self.left:
                 self.image = self.ninja_idle_lt
 
-        if keys[pygame.K_UP] and not self.falling and not self.jumping:
-            self.falling = False
+        dy += self.gravity
+
+        # JUMPING MECHANIC
+        if keys[pygame.K_UP] and not self.jumping and not self.falling:
             self.jumping = True
+
+            # if self.jump_count >= -10:
+            #     neg = 1
+            #     if self.jump_count < 0:
+            #         neg = -1
+            #     dy -= int(((self.jump_count ** 2) * .5 * neg))
+            #     self.jump_count -= 1
+            # else:
+            #     self.jumping = False
+            #     self.jump_count = 10
+
             if self.jump_count >= -10:
                 neg = 1
 
                 if self.jump_count < 0:
                     neg = -1
 
-                dy -= int(((self.jump_count ** 2) * .5 * neg))
+                dy -= block_size * 2 * neg
                 self.jump_count -= 1
 
             else:
                 self.jumping = False
-                # self.falling = True
                 self.jump_count = 10
 
-        if self.falling:
-            dy += self.gravity
 
 
 # COLLISION DETECTION
@@ -347,33 +357,35 @@ class player(pygame.sprite.Sprite):
             if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
                 dx = 0
 
-            if tile[1].colliderect(self.image_rect.x, self.image_rect.y + self.gravity, self.image_rect.width, self.image_rect.height):
+            if tile[1].colliderect(self.image_rect.x, self.image_rect.y + dy, self.image_rect.width, self.image_rect.height):
                 if dy < 0:
-                    dy = tile[1].bottom - self.image_rect.top
+                    # dy = tile[1].bottom - self.image_rect.top
+                    dy = 0
+                    self.jumping = False
+                    self.falling = True
+
+                elif dy >= 0:
+                    dy = 0
+                    # dy = tile[1].top - self.image_rect.bottom
                     self.jumping = False
                     self.falling = False
 
 
-                elif dy >= 0:
-                    dy = tile[1].top - self.image_rect.bottom
-                    self.jumping = False
-
-
-
-
-        # UPDATE POSITION AND DISPLAY IT
+        # UPDATE POSITION
         self.image_rect.x += dx
         self.image_rect.y += dy
 
-
+        # CHECK BOUNDARIES
         if self.image_rect.top >= 495:
             self.image_rect.top = 495
 
         if self.image_rect.left <= 0:
             self.image_rect.left = 0
+            self.current_frame = 0
 
         elif self.image_rect.right >= screen_w:
             self.image_rect.right = screen_w
+            self.current_frame = 0
 
         self.draw()
 
