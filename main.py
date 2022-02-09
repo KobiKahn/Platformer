@@ -127,6 +127,7 @@ class player(pygame.sprite.Sprite):
 
         self.falling = False
         self.jumping = False
+        self.y_vel = 0
         self.jump_count = 10
         self.gravity = 3
 
@@ -282,7 +283,7 @@ class player(pygame.sprite.Sprite):
 
             now = pygame.time.get_ticks()
 
-            if (now - self.last) >= self.image_delay:
+            if (now - self.last) >= self.image_delay and self.jumping == False:
                 self.last = now
 
                 if (self.current_frame + 1) < len(self.ninja_run_rt):
@@ -300,7 +301,7 @@ class player(pygame.sprite.Sprite):
 
             now = pygame.time.get_ticks()
 
-            if (now - self.last) >= self.image_delay:
+            if (now - self.last) >= self.image_delay and self.jumping == False:
                 self.last = now
 
                 if (self.current_frame + 1) < len(self.ninja_run_lt):
@@ -321,35 +322,44 @@ class player(pygame.sprite.Sprite):
             elif self.left:
                 self.image = self.ninja_idle_lt
 
-        dy += self.gravity
-
         # JUMPING MECHANIC
         if keys[pygame.K_UP] and not self.jumping and not self.falling:
+            now = pygame.time.get_ticks()
+
             self.jumping = True
+            self.y_vel = -13
 
-            # if self.jump_count >= -10:
-            #     neg = 1
-            #     if self.jump_count < 0:
-            #         neg = -1
-            #     dy -= int(((self.jump_count ** 2) * .5 * neg))
-            #     self.jump_count -= 1
-            # else:
-            #     self.jumping = False
-            #     self.jump_count = 10
+        # if (now - self.last) >= self.image_delay:
+        #     self.last = now
+        #     if self.left:
+        #         if (self.current_frame + 1) < len(self.ninja_jump_lt):
+        #             self.current_frame += 1
+        #         else:
+        #             self.current_frame = 0
+        #
+        #         self.image = self.ninja_jump_lt[self.current_frame]
+        #
+        #     else:
+        #         if (self.current_frame + 1) < len(self.ninja_jump_rt):
+        #             self.current_frame += 1
+        #         else:
+        #             self.current_frame = 0
+        #         self.image = self.ninja_jump_rt[self.current_frame]
 
-            if self.jump_count >= -10:
-                neg = 1
+        dy += self.y_vel
+        self.y_vel += 1
 
-                if self.jump_count < 0:
-                    neg = -1
 
-                dy -= block_size * 2 * neg
-                self.jump_count -= 1
+        if self.y_vel < 0:
+            self.jumping = True
+            self.falling = False
+        
+        else: 
+            self.jumping = False
+            self.falling = True
 
-            else:
-                self.jumping = False
-                self.jump_count = 10
-
+        # if self.jumping == False:
+        #     self.current_frame = 0
 
 
 # COLLISION DETECTION
@@ -358,15 +368,16 @@ class player(pygame.sprite.Sprite):
                 dx = 0
 
             if tile[1].colliderect(self.image_rect.x, self.image_rect.y + dy, self.image_rect.width, self.image_rect.height):
-                if dy < 0:
-                    # dy = tile[1].bottom - self.image_rect.top
-                    dy = 0
+
+                if self.y_vel < 0:
+                    dy = tile[1].bottom - self.image_rect.top
+                    self.y_vel = 0
                     self.jumping = False
                     self.falling = True
 
-                elif dy >= 0:
-                    dy = 0
-                    # dy = tile[1].top - self.image_rect.bottom
+                elif self.y_vel > 0:
+                    dy = tile[1].top - self.image_rect.bottom
+                    self.y_vel = 0
                     self.jumping = False
                     self.falling = False
 
