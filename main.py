@@ -268,6 +268,11 @@ class player(pygame.sprite.Sprite):
         self.ninja_jump_lt = [pygame.transform.flip(player, True, False) for player in self.ninja_jump_rt]
 
 
+    def camera_move(self, dx):
+        for tile in self.tile_set:
+            tile[1].x += dx
+
+
     def update(self):
         dx = 0
         dy = 0
@@ -275,11 +280,49 @@ class player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
 
         # RUN RIGHT
-        if keys[pygame.K_RIGHT]:
+        if self.image_rect.x >= 100 and self.image_rect.x <= screen_w - 200:
+            if keys[pygame.K_RIGHT]:
+                self.left = False
+                self.right = True
+
+                dx = 5
+
+                now = pygame.time.get_ticks()
+
+                if (now - self.last) >= self.image_delay and self.jumping == False:
+                    self.last = now
+
+                    if (self.current_frame + 1) < len(self.ninja_run_rt):
+                        self.current_frame += 1
+                    else:
+                        self.current_frame = 0
+
+                    self.image = self.ninja_run_rt[self.current_frame]
+            # RUN LEFT
+            elif keys[pygame.K_LEFT]:
+                self.left = True
+                self.right = False
+
+                dx = -5
+
+                now = pygame.time.get_ticks()
+
+                if (now - self.last) >= self.image_delay and self.jumping == False:
+                    self.last = now
+
+                    if (self.current_frame + 1) < len(self.ninja_run_lt):
+                        self.current_frame += 1
+                    else:
+                        self.current_frame = 0
+
+                    self.image = self.ninja_run_lt[self.current_frame]
+
+
+# WALL MOVING TO THE LEFT SO IT LOOKS LIKE IT GOES TO THE LEFT
+        elif keys[pygame.K_RIGHT]:
             self.left = False
             self.right = True
-
-            dx = 5
+            dx = -5
 
             now = pygame.time.get_ticks()
 
@@ -292,12 +335,12 @@ class player(pygame.sprite.Sprite):
                     self.current_frame = 0
 
                 self.image = self.ninja_run_rt[self.current_frame]
-        # RUN LEFT
+        # RUN LEFT SO BOUNDARY MOVES TO THE RIGHT
         elif keys[pygame.K_LEFT]:
             self.left = True
             self.right = False
 
-            dx = -5
+            dx = 5
 
             now = pygame.time.get_ticks()
 
@@ -310,9 +353,9 @@ class player(pygame.sprite.Sprite):
                     self.current_frame = 0
 
                 self.image = self.ninja_run_lt[self.current_frame]
+
         # IDLE
         else:
-            # print(self.current_frame)
             self.current_frame = 0
             dx = 0
 
@@ -322,33 +365,15 @@ class player(pygame.sprite.Sprite):
             elif self.left:
                 self.image = self.ninja_idle_lt
 
+
         # JUMPING MECHANIC
         if keys[pygame.K_UP] and not self.jumping and not self.falling:
-            now = pygame.time.get_ticks()
 
             self.jumping = True
             self.y_vel = -13
 
-        # if (now - self.last) >= self.image_delay:
-        #     self.last = now
-        #     if self.left:
-        #         if (self.current_frame + 1) < len(self.ninja_jump_lt):
-        #             self.current_frame += 1
-        #         else:
-        #             self.current_frame = 0
-        #
-        #         self.image = self.ninja_jump_lt[self.current_frame]
-        #
-        #     else:
-        #         if (self.current_frame + 1) < len(self.ninja_jump_rt):
-        #             self.current_frame += 1
-        #         else:
-        #             self.current_frame = 0
-        #         self.image = self.ninja_jump_rt[self.current_frame]
-
         dy += self.y_vel
         self.y_vel += 1
-
 
         if self.y_vel < 0:
             self.jumping = True
@@ -358,12 +383,10 @@ class player(pygame.sprite.Sprite):
             self.jumping = False
             self.falling = True
 
-        # if self.jumping == False:
-        #     self.current_frame = 0
-
 
 # COLLISION DETECTION
         for tile in self.tile_set:
+
             if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
                 dx = 0
 
@@ -382,8 +405,17 @@ class player(pygame.sprite.Sprite):
                     self.falling = False
 
 
+        if self.image_rect.x <= 0:
+            self.image_rect.x = 0
+
         # UPDATE POSITION
-        self.image_rect.x += dx
+        if self.image_rect.x >= 100 and self.image_rect.x <= screen_w - 200:
+            self.image_rect.x += dx
+
+        else:
+            self.camera_move(dx)
+
+
         self.image_rect.y += dy
 
         # CHECK BOUNDARIES
@@ -402,8 +434,7 @@ class player(pygame.sprite.Sprite):
 
     def draw(self):
         screen.blit(self.image, self.image_rect)
-        pygame.draw.rect(screen, (255,255,255), self.image_rect, 2)
-
+        # pygame.draw.rect(screen, (255,255,255), self.image_rect, 2)
 
 
 
@@ -417,7 +448,6 @@ class Level:
         self.tile_list = []
         self.tile_plants = []
         self.block_size = block_size
-
 
         temple_sheet = SpriteSheet('Temple_spritesheet.png')
         gate_sheet = SpriteSheet('Japan_Gate.png')
@@ -449,9 +479,15 @@ class Level:
 
         self.platform_small = pygame.transform.scale(self.platform_big, (self.block_size, self.block_size / 1.5))
 
+        self.platform_xsmall = pygame.transform.scale(self.platform_big, (self.block_size / 1.5, self.block_size / 1.5))
+
         self.platform_long = temple_sheet.image_at((0, 320, 255, 21)).convert_alpha()
         self.platform_long = pygame.transform.scale(self.platform_long, (350, 30))
 
+        # TEMPLE WALLS
+        self.pillar_bottom = temple_sheet.image_at((225, 224, 31, 96)).convert_alpha()
+
+        self.pillar_top = pygame.transform.flip(self.pillar_bottom, False, True)
 
     def make_layout(self):
         for i, row in enumerate(self.layout):
@@ -475,6 +511,23 @@ class Level:
                     tile = (self.platform_big, (image_rect))
                     self.tile_list.append(tile)
 
+                elif col == 'p':
+                    image_rect = self.pillar_bottom.get_rect()
+                    image_rect.x = x_val
+                    image_rect.y = y_val
+
+                    tile = (self.pillar_bottom, (image_rect))
+                    self.tile_list.append(tile)
+
+                elif col == 'P':
+                    image_rect = self.pillar_top.get_rect()
+                    image_rect.x = x_val
+                    image_rect.y = y_val
+
+                    tile = (self.pillar_top, (image_rect))
+                    self.tile_list.append(tile)
+
+
 
                 elif col == 'S':
                     image_rect = self.platform_small.get_rect()
@@ -482,6 +535,14 @@ class Level:
                     image_rect.y = y_val
 
                     tile = (self.platform_small, (image_rect))
+                    self.tile_list.append(tile)
+
+                elif col == 'X':
+                    image_rect = self.platform_xsmall.get_rect()
+                    image_rect.x = x_val
+                    image_rect.y = y_val
+
+                    tile = (self.platform_xsmall, (image_rect))
                     self.tile_list.append(tile)
 
                 elif col == 'L':
@@ -533,6 +594,9 @@ class Level:
 
             screen.blit(tile[0], tile[1])
 
+
+
+
     def draw_plants(self):
 
         for tile in self.tile_plants:
@@ -547,6 +611,7 @@ def draw_grid(width, height, size):
         for y in range(1, height, size):
             rect = pygame.Rect(x, y, size, size)
             pygame.draw.rect(screen, BLACK, rect, 2)
+
 
 
 
