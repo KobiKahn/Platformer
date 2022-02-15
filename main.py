@@ -274,20 +274,27 @@ class player(pygame.sprite.Sprite):
 
 
     def update(self):
+        print(self.image_rect.x)
         dx = 0
         dy = 0
 
         keys = pygame.key.get_pressed()
 
+        if self.image_rect.x > 100 and self.image_rect.x < screen_w - 100:
+            self.free_move = True
+
+        else:
+            self.free_move = False
+
         # RUN RIGHT
-        if self.image_rect.x >= 100 and self.image_rect.x <= screen_w - 200:
-            if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_RIGHT]:
+            if self.free_move:
+                self.cam_right = False
+                self.cam_left = False
                 self.left = False
                 self.right = True
-
-                dx = 5
-
                 now = pygame.time.get_ticks()
+                dx = 5
 
                 if (now - self.last) >= self.image_delay and self.jumping == False:
                     self.last = now
@@ -296,10 +303,36 @@ class player(pygame.sprite.Sprite):
                         self.current_frame += 1
                     else:
                         self.current_frame = 0
-
                     self.image = self.ninja_run_rt[self.current_frame]
+
+
+            elif self.image_rect.x >= screen_w - 100:
+                self.free_move = False
+                self.cam_right = True
+                self.cam_left = False
+                dx = 0
+                now = pygame.time.get_ticks()
+                if (now - self.last) >= self.image_delay and self.jumping == False:
+                    self.last = now
+                    if (self.current_frame + 1) < len(self.ninja_run_rt):
+                        self.current_frame += 1
+                    else:
+                        self.current_frame = 0
+                    self.image = self.ninja_run_rt[self.current_frame]
+
+                self.camera_move(-5)
+
+
+            elif self.image_rect.x <= 100:
+                self.free_move = True
+                self.image_rect.x = 101
+
+
             # RUN LEFT
-            elif keys[pygame.K_LEFT]:
+        elif keys[pygame.K_LEFT]:
+            if self.free_move:
+                self.cam_right = False
+                self.cam_left = False
                 self.left = True
                 self.right = False
 
@@ -316,43 +349,27 @@ class player(pygame.sprite.Sprite):
                         self.current_frame = 0
 
                     self.image = self.ninja_run_lt[self.current_frame]
+#
+            elif self.image_rect.x <= 100:
+                self.free_move = False
+                self.cam_left = True
+                self.cam_right = False
 
+                dx = 0
+                now = pygame.time.get_ticks()
+                if (now - self.last) >= self.image_delay and self.jumping == False:
+                    self.last = now
+                    if (self.current_frame + 1) < len(self.ninja_run_lt):
+                        self.current_frame += 1
+                    else:
+                        self.current_frame = 0
+                    self.image = self.ninja_run_lt[self.current_frame]
+                self.camera_move(5)
 
-# WALL MOVING TO THE LEFT SO IT LOOKS LIKE IT GOES TO THE LEFT
-        elif keys[pygame.K_RIGHT]:
-            self.left = False
-            self.right = True
-            dx = -5
+            elif self.image_rect.x >= screen_w - 100:
+                self.free_move = True
+                self.image_rect.x = screen_w - 101
 
-            now = pygame.time.get_ticks()
-
-            if (now - self.last) >= self.image_delay and self.jumping == False:
-                self.last = now
-
-                if (self.current_frame + 1) < len(self.ninja_run_rt):
-                    self.current_frame += 1
-                else:
-                    self.current_frame = 0
-
-                self.image = self.ninja_run_rt[self.current_frame]
-        # RUN LEFT SO BOUNDARY MOVES TO THE RIGHT
-        elif keys[pygame.K_LEFT]:
-            self.left = True
-            self.right = False
-
-            dx = 5
-
-            now = pygame.time.get_ticks()
-
-            if (now - self.last) >= self.image_delay and self.jumping == False:
-                self.last = now
-
-                if (self.current_frame + 1) < len(self.ninja_run_lt):
-                    self.current_frame += 1
-                else:
-                    self.current_frame = 0
-
-                self.image = self.ninja_run_lt[self.current_frame]
 
         # IDLE
         else:
@@ -386,7 +403,6 @@ class player(pygame.sprite.Sprite):
 
 # COLLISION DETECTION
         for tile in self.tile_set:
-
             if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
                 dx = 0
 
@@ -408,14 +424,8 @@ class player(pygame.sprite.Sprite):
         if self.image_rect.x <= 0:
             self.image_rect.x = 0
 
-        # UPDATE POSITION
-        if self.image_rect.x >= 100 and self.image_rect.x <= screen_w - 200:
-            self.image_rect.x += dx
 
-        else:
-            self.camera_move(dx)
-
-
+        self.image_rect.x += dx
         self.image_rect.y += dy
 
         # CHECK BOUNDARIES
@@ -621,7 +631,7 @@ layout_list = level_1.make_layout()
 level_1_plants = Level(levels.Level_1_plants, block_size)
 plant_list = level_1_plants.make_layout()
 
-ninja = player('SamuraiLight.png', 100, 495, layout_list)
+ninja = player('SamuraiLight.png', 110, 495, layout_list)
 
 
 # GAME BACKGROUND
