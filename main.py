@@ -112,9 +112,10 @@ class SpriteSheet:
 
 # PLAYER CLASS
 class player(pygame.sprite.Sprite):
-    def __init__(self, picture_path, x, y, tile_set):
+    def __init__(self, picture_path, x, y, tile_set, plant_set):
 
         self.tile_set = tile_set
+        self.plant_set = plant_set
 
         self.ninja_sheet = SpriteSheet(picture_path)
 
@@ -272,15 +273,17 @@ class player(pygame.sprite.Sprite):
         for tile in self.tile_set:
             tile[1].x += dx
 
+        for tile in self.plant_set:
+            tile[1].x += dx
+
 
     def update(self):
-        print(self.image_rect.x)
         dx = 0
         dy = 0
 
         keys = pygame.key.get_pressed()
 
-        if self.image_rect.x > 100 and self.image_rect.x < screen_w - 100:
+        if self.image_rect.x > 200 and self.image_rect.x < screen_w - 200:
             self.free_move = True
 
         else:
@@ -306,7 +309,7 @@ class player(pygame.sprite.Sprite):
                     self.image = self.ninja_run_rt[self.current_frame]
 
 
-            elif self.image_rect.x >= screen_w - 100:
+            elif self.image_rect.x >= screen_w - 200:
                 self.free_move = False
                 self.cam_right = True
                 self.cam_left = False
@@ -323,9 +326,9 @@ class player(pygame.sprite.Sprite):
                 self.camera_move(-5)
 
 
-            elif self.image_rect.x <= 100:
+            elif self.image_rect.x <= 200:
                 self.free_move = True
-                self.image_rect.x = 101
+                self.image_rect.x = 201
 
 
             # RUN LEFT
@@ -350,7 +353,7 @@ class player(pygame.sprite.Sprite):
 
                     self.image = self.ninja_run_lt[self.current_frame]
 #
-            elif self.image_rect.x <= 100:
+            elif self.image_rect.x <= 200:
                 self.free_move = False
                 self.cam_left = True
                 self.cam_right = False
@@ -366,9 +369,9 @@ class player(pygame.sprite.Sprite):
                     self.image = self.ninja_run_lt[self.current_frame]
                 self.camera_move(5)
 
-            elif self.image_rect.x >= screen_w - 100:
+            elif self.image_rect.x >= screen_w - 200:
                 self.free_move = True
-                self.image_rect.x = screen_w - 101
+                self.image_rect.x = screen_w - 201
 
 
         # IDLE
@@ -537,8 +540,6 @@ class Level:
                     tile = (self.pillar_top, (image_rect))
                     self.tile_list.append(tile)
 
-
-
                 elif col == 'S':
                     image_rect = self.platform_small.get_rect()
                     image_rect.x = x_val
@@ -572,7 +573,16 @@ class Level:
                     tile = (self.gate, (image_rect))
                     self.tile_list.append(tile)
 
-                elif col == 'b':
+        return(self.tile_list)
+
+
+    def make_plant_layout(self):
+        for i, row in enumerate(self.layout):
+            for j, col in enumerate(row):
+                x_val = j * self.block_size
+                y_val = i * self.block_size
+
+                if col == 'b':
                     image_rect = self.tree_big.get_rect()
                     image_rect.x = x_val
                     image_rect.y = y_val
@@ -596,7 +606,7 @@ class Level:
                     tile = (self.hedge_small, (image_rect))
                     self.tile_plants.append(tile)
 
-        return(self.tile_list)
+        return(self.tile_plants)
 
 
     def draw(self):
@@ -629,9 +639,11 @@ level_1 = Level(levels.Level_1, block_size)
 layout_list = level_1.make_layout()
 
 level_1_plants = Level(levels.Level_1_plants, block_size)
-plant_list = level_1_plants.make_layout()
+plant_list = level_1_plants.make_plant_layout()
 
-ninja = player('SamuraiLight.png', 110, 495, layout_list)
+
+
+ninja = player('SamuraiLight.png', 110, 495, layout_list, plant_list)
 
 
 # GAME BACKGROUND
