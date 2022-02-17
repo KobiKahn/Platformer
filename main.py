@@ -270,11 +270,14 @@ class player(pygame.sprite.Sprite):
 
 
     def camera_move(self, dx):
-        for tile in self.tile_set:
-            tile[1].x += dx
 
         for tile in self.plant_set:
             tile[1].x += dx
+
+        for tile in self.tile_set:
+            if not tile[1].colliderect(self.image_rect.x + (-1 * dx), self.image_rect.y, self.image_rect.width, self.image_rect.height):
+                print('HIT')
+                tile[1].x += dx
 
 
     def update(self):
@@ -367,6 +370,7 @@ class player(pygame.sprite.Sprite):
                     else:
                         self.current_frame = 0
                     self.image = self.ninja_run_lt[self.current_frame]
+
                 self.camera_move(5)
 
             elif self.image_rect.x >= screen_w - 200:
@@ -405,10 +409,12 @@ class player(pygame.sprite.Sprite):
 
 
 # COLLISION DETECTION
-        for tile in self.tile_set:
-            if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
-                dx = 0
+        if self.free_move:
+            for tile in self.tile_set:
+                if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
+                    dx = 0
 
+        for tile in self.tile_set:
             if tile[1].colliderect(self.image_rect.x, self.image_rect.y + dy, self.image_rect.width, self.image_rect.height):
 
                 if self.y_vel < 0:
@@ -499,6 +505,7 @@ class Level:
 
         # TEMPLE WALLS
         self.pillar_bottom = temple_sheet.image_at((225, 224, 31, 96)).convert_alpha()
+        self.pillar_bottom = pygame.transform.scale(self.pillar_bottom, (block_size, block_size))
 
         self.pillar_top = pygame.transform.flip(self.pillar_bottom, False, True)
 
@@ -643,7 +650,7 @@ plant_list = level_1_plants.make_plant_layout()
 
 
 
-ninja = player('SamuraiLight.png', 110, 495, layout_list, plant_list)
+ninja = player('SamuraiLight.png', 410, 495, layout_list, plant_list)
 
 
 # GAME BACKGROUND
