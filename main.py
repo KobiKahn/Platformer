@@ -132,10 +132,13 @@ class player(pygame.sprite.Sprite):
         self.jump_count = 10
         self.gravity = 3
 
+        self.cam_left = False
+        self.cam_right = False
+        self.free_move = True
 
         # IDLE
         self.ninja_idle_rt = self.ninja_sheet.image_at((444, 49, 141, 229), -1)
-        self.ninja_idle_rt = pygame.transform.scale(self.ninja_idle_rt, (block_size, block_size * 1.25))
+        self.ninja_idle_rt = pygame.transform.scale(self.ninja_idle_rt, (block_size * .95, block_size * 1.25))
         self.ninja_idle_lt = pygame.transform.flip(self.ninja_idle_rt, True, False)
 
         self.image = self.ninja_idle_rt
@@ -183,7 +186,7 @@ class player(pygame.sprite.Sprite):
         self.ninja_run_rt_wrong.append(self.ninja_run_rt_10)
 
         for player in self.ninja_run_rt_wrong:
-            player = pygame.transform.scale(player, (block_size, block_size * 1.25))
+            player = pygame.transform.scale(player, (block_size * .95, block_size * 1.25))
             self.ninja_run_rt.append(player)
 
         self.ninja_run_lt = [pygame.transform.flip(player, True, False) for player in self.ninja_run_rt]
@@ -223,7 +226,7 @@ class player(pygame.sprite.Sprite):
         self.ninja_hit_rt_wrong.append(self.ninja_hit_rt_10)
 
         for player in self.ninja_hit_rt_wrong:
-            player = pygame.transform.scale(player, (block_size, block_size * 1.25))
+            player = pygame.transform.scale(player, (block_size * .95, block_size * 1.25))
             self.ninja_hit_rt.append(player)
 
         self.ninja_hit_lt = [pygame.transform.flip(player, True, False) for player in self.ninja_hit_rt]
@@ -263,7 +266,7 @@ class player(pygame.sprite.Sprite):
         self.ninja_jump_rt_wrong.append(self.ninja_jump_rt_10)
 
         for player in self.ninja_jump_rt_wrong:
-            player = pygame.transform.scale(player, (block_size, block_size * 1.25))
+            player = pygame.transform.scale(player, (block_size * .95, block_size * 1.25))
             self.ninja_jump_rt.append(player)
 
         self.ninja_jump_lt = [pygame.transform.flip(player, True, False) for player in self.ninja_jump_rt]
@@ -276,8 +279,10 @@ class player(pygame.sprite.Sprite):
 
         for tile in self.tile_set:
             if not tile[1].colliderect(self.image_rect.x + (-1 * dx), self.image_rect.y, self.image_rect.width, self.image_rect.height):
-                print('HIT')
+                # print('HIT')
                 tile[1].x += dx
+
+
 
 
     def update(self):
@@ -326,7 +331,7 @@ class player(pygame.sprite.Sprite):
                         self.current_frame = 0
                     self.image = self.ninja_run_rt[self.current_frame]
 
-                self.camera_move(-5)
+                # self.camera_move(-5)
 
 
             elif self.image_rect.x <= 200:
@@ -341,9 +346,7 @@ class player(pygame.sprite.Sprite):
                 self.cam_left = False
                 self.left = True
                 self.right = False
-
                 dx = -5
-
                 now = pygame.time.get_ticks()
 
                 if (now - self.last) >= self.image_delay and self.jumping == False:
@@ -355,7 +358,7 @@ class player(pygame.sprite.Sprite):
                         self.current_frame = 0
 
                     self.image = self.ninja_run_lt[self.current_frame]
-#
+            # CHECK IF CAMERA MOVE OR NOT
             elif self.image_rect.x <= 200:
                 self.free_move = False
                 self.cam_left = True
@@ -371,11 +374,36 @@ class player(pygame.sprite.Sprite):
                         self.current_frame = 0
                     self.image = self.ninja_run_lt[self.current_frame]
 
-                self.camera_move(5)
+                # self.camera_move(5)
 
+            # CHECK IF FREE MOVE
             elif self.image_rect.x >= screen_w - 200:
                 self.free_move = True
                 self.image_rect.x = screen_w - 201
+
+
+        elif keys[pygame.K_SPACE]:
+            now = pygame.time.get_ticks()
+            # RIGHT HITTING ANIMATION
+            if self.right:
+                if (now - self.last) >= self.image_delay:
+                    self.last = now
+                    if (self.current_frame + 1) < len(self.ninja_hit_rt):
+                        self.current_frame += 1
+
+                    else:
+                        self.current_frame = 0
+                    self.image = self.ninja_hit_rt[self.current_frame]
+            # LEFT HITTING ANIMATION
+            else:
+                if (now - self.last) >= self.image_delay:
+                    self.last = now
+                    if (self.current_frame + 1) < len(self.ninja_hit_lt):
+                        self.current_frame += 1
+
+                    else:
+                        self.current_frame = 0
+                    self.image = self.ninja_hit_lt[self.current_frame]
 
 
         # IDLE
@@ -413,6 +441,14 @@ class player(pygame.sprite.Sprite):
             for tile in self.tile_set:
                 if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
                     dx = 0
+        else:
+            for tile in self.tile_set:
+                if tile[1].colliderect(self.image_rect.x + 5, self.image_rect.y, self.image_rect.width, self.image_rect.height):
+                    self.cam_right = False
+
+                elif tile[1].colliderect(self.image_rect.x - 5, self.image_rect.y, self.image_rect.width, self.image_rect.height):
+                    self.cam_left = False
+
 
         for tile in self.tile_set:
             if tile[1].colliderect(self.image_rect.x, self.image_rect.y + dy, self.image_rect.width, self.image_rect.height):
@@ -429,25 +465,18 @@ class player(pygame.sprite.Sprite):
                     self.jumping = False
                     self.falling = False
 
+        if self.cam_left and keys[pygame.K_LEFT]:
+            self.camera_move(5)
+            dx = 0
 
-        if self.image_rect.x <= 0:
-            self.image_rect.x = 0
-
+        elif self.cam_right and keys[pygame.K_RIGHT]:
+            self.camera_move(-5)
+            dx = 0
 
         self.image_rect.x += dx
         self.image_rect.y += dy
 
-        # CHECK BOUNDARIES
-        if self.image_rect.top >= 495:
-            self.image_rect.top = 495
 
-        if self.image_rect.left <= 0:
-            self.image_rect.left = 0
-            self.current_frame = 0
-
-        elif self.image_rect.right >= screen_w:
-            self.image_rect.right = screen_w
-            self.current_frame = 0
 
         self.draw()
 
@@ -652,16 +681,23 @@ plant_list = level_1_plants.make_plant_layout()
 
 ninja = player('SamuraiLight.png', 410, 495, layout_list, plant_list)
 
-
+################## IMAGES #######################
 # GAME BACKGROUND
 moon_bg = 'Moon-Mountain-BG.png'
 moon_bg = pygame.image.load(moon_bg).convert_alpha()
 
+# NINJA SWORD
+sword_lt_img = 'SWORD_LT.png'
+sword_lt = pygame.image.load(sword_lt_img).convert_alpha()
+sword_lt = pygame.transform.scale(sword_lt, (40, 20))
 
+sword_rt_img = 'SWORD_RT.png'
+sword_rt = pygame.image.load(sword_rt_img).convert_alpha()
+sword_rt = pygame.transform.scale(sword_rt, (40, 20))
 
 ###################################################################################
 
-
+# MAIN LOOP
 while True:
 
     keys = pygame.key.get_pressed()
@@ -680,6 +716,7 @@ while True:
 
     level_1.draw()
     level_1_plants.draw_plants()
+
 
     ninja.update()
 
