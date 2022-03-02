@@ -109,6 +109,36 @@ class SpriteSheet:
         return self.images_at(sprite_rects, colorkey)
 
 
+# THROWING KNIFE
+class sword(pygame.sprite.Sprite):
+    def __init__(self, x, y, right, tile_set, plant_set):
+        # NINJA SWORD LEFT
+        self.sword_lt_img = 'SWORD_LT.png'
+        self.sword_lt = pygame.image.load(self.sword_lt_img).convert_alpha()
+        self.sword_lt = pygame.transform.scale(self.sword_lt, (40, 20))
+
+        #NINJA SWORD RIGHT
+        self.sword_rt_img = 'SWORD_RT.png'
+        self.sword_rt = pygame.image.load(self.sword_rt_img).convert_alpha()
+        self.sword_rt = pygame.transform.scale(self.sword_rt, (40, 20))
+
+        # TILE SET DEFINED
+        self.tile_set = tile_set
+        self.plant_set = plant_set
+
+        # SET PLAYER INSTANCE
+        self.sword_x = x
+        self.sword_y = y
+
+        self.right = right
+
+    def display_sword(self):
+        # print(self.sword_x, self.sword_y)
+        screen.blit(self.sword_rt, (self.sword_x, self.sword_y))
+
+
+
+
 
 # PLAYER CLASS
 class player(pygame.sprite.Sprite):
@@ -284,7 +314,6 @@ class player(pygame.sprite.Sprite):
 
 
 
-
     def update(self):
         dx = 0
         dy = 0
@@ -330,8 +359,6 @@ class player(pygame.sprite.Sprite):
                     else:
                         self.current_frame = 0
                     self.image = self.ninja_run_rt[self.current_frame]
-
-                # self.camera_move(-5)
 
 
             elif self.image_rect.x <= 200:
@@ -381,31 +408,6 @@ class player(pygame.sprite.Sprite):
                 self.free_move = True
                 self.image_rect.x = screen_w - 201
 
-
-        elif keys[pygame.K_SPACE]:
-            now = pygame.time.get_ticks()
-            # RIGHT HITTING ANIMATION
-            if self.right:
-                if (now - self.last) >= self.image_delay:
-                    self.last = now
-                    if (self.current_frame + 1) < len(self.ninja_hit_rt):
-                        self.current_frame += 1
-
-                    else:
-                        self.current_frame = 0
-                    self.image = self.ninja_hit_rt[self.current_frame]
-            # LEFT HITTING ANIMATION
-            else:
-                if (now - self.last) >= self.image_delay:
-                    self.last = now
-                    if (self.current_frame + 1) < len(self.ninja_hit_lt):
-                        self.current_frame += 1
-
-                    else:
-                        self.current_frame = 0
-                    self.image = self.ninja_hit_lt[self.current_frame]
-
-
         # IDLE
         else:
             self.current_frame = 0
@@ -436,7 +438,7 @@ class player(pygame.sprite.Sprite):
             self.falling = True
 
 
-# COLLISION DETECTION
+# X COLLISION DETECTION
         if self.free_move:
             for tile in self.tile_set:
                 if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
@@ -449,7 +451,7 @@ class player(pygame.sprite.Sprite):
                 elif tile[1].colliderect(self.image_rect.x - 5, self.image_rect.y, self.image_rect.width, self.image_rect.height):
                     self.cam_left = False
 
-
+# Y COLLISION DETECTION
         for tile in self.tile_set:
             if tile[1].colliderect(self.image_rect.x, self.image_rect.y + dy, self.image_rect.width, self.image_rect.height):
 
@@ -476,13 +478,15 @@ class player(pygame.sprite.Sprite):
         self.image_rect.x += dx
         self.image_rect.y += dy
 
-
-
         self.draw()
 
     def draw(self):
         screen.blit(self.image, self.image_rect)
         # pygame.draw.rect(screen, (255,255,255), self.image_rect, 2)
+
+    def get_data(self):
+        return self.image_rect.x, self.image_rect.y, self.right, self.tile_set, self.plant_set
+
 
 
 
@@ -647,18 +651,12 @@ class Level:
 
     def draw(self):
         for tile in self.tile_list:
-
             screen.blit(tile[0], tile[1])
-
-
 
 
     def draw_plants(self):
-
         for tile in self.tile_plants:
-
             screen.blit(tile[0], tile[1])
-
 
 
 def draw_grid(width, height, size):
@@ -669,14 +667,11 @@ def draw_grid(width, height, size):
             pygame.draw.rect(screen, BLACK, rect, 2)
 
 
-
-
 level_1 = Level(levels.Level_1, block_size)
 layout_list = level_1.make_layout()
 
 level_1_plants = Level(levels.Level_1_plants, block_size)
 plant_list = level_1_plants.make_plant_layout()
-
 
 
 ninja = player('SamuraiLight.png', 410, 495, layout_list, plant_list)
@@ -686,14 +681,7 @@ ninja = player('SamuraiLight.png', 410, 495, layout_list, plant_list)
 moon_bg = 'Moon-Mountain-BG.png'
 moon_bg = pygame.image.load(moon_bg).convert_alpha()
 
-# NINJA SWORD
-sword_lt_img = 'SWORD_LT.png'
-sword_lt = pygame.image.load(sword_lt_img).convert_alpha()
-sword_lt = pygame.transform.scale(sword_lt, (40, 20))
 
-sword_rt_img = 'SWORD_RT.png'
-sword_rt = pygame.image.load(sword_rt_img).convert_alpha()
-sword_rt = pygame.transform.scale(sword_rt, (40, 20))
 
 ###################################################################################
 
@@ -709,6 +697,11 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+
+    if keys[pygame.K_SPACE]:
+        x, y, right, tile_set, plant_set = ninja.get_data()
+        throwing_sword = sword(x, y, right, tile_set, plant_set)
+        throwing_sword.display_sword()
 
     screen.blit(moon_bg, (0,0))
 
