@@ -111,7 +111,10 @@ class SpriteSheet:
 
 # THROWING KNIFE
 class sword(pygame.sprite.Sprite):
-    def __init__(self, x, y, right, tile_set, plant_set):
+    def __init__(self, x, y, right, tile_set, plant_set, screen):
+
+        self.screen = screen
+
         # NINJA SWORD LEFT
         self.sword_lt_img = 'SWORD_LT.png'
         self.sword_lt = pygame.image.load(self.sword_lt_img).convert_alpha()
@@ -122,19 +125,52 @@ class sword(pygame.sprite.Sprite):
         self.sword_rt = pygame.image.load(self.sword_rt_img).convert_alpha()
         self.sword_rt = pygame.transform.scale(self.sword_rt, (40, 20))
 
+        self.image = self.sword_rt
+        self.image_rect = self.image.get_rect()
+        self.image_rect.x = x
+        self.image_rect.y = y
+
         # TILE SET DEFINED
         self.tile_set = tile_set
         self.plant_set = plant_set
 
-        # SET PLAYER INSTANCE
-        self.sword_x = x
-        self.sword_y = y
-
         self.right = right
+
+        self.collide = False
+
+    def collisions(self):
+        for tile in self.tile_set:
+            if tile[1].colliderect(self.image_rect.x + self.sword_vel, self.image_rect.y, self.image_rect.width, self.image_rect.height):
+                print('COLLISION')
+                self.collide = True
+                self.sword_vel = 0
+            else:
+                print('NO COLLISION')
+                self.collide = False
+
+
+    def move_sword(self):
+        if self.right:
+            self.sword_vel = 5
+            self.image = self.sword_rt
+        else:
+            self.image = self.sword_lt
+            self.sword_vel = -5
+
+        self.collisions()
+
+        if self.collide == False:
+            self.image_rect.x += self.sword_vel
+            self.display_sword()
 
     def display_sword(self):
         # print(self.sword_x, self.sword_y)
-        screen.blit(self.sword_rt, (self.sword_x, self.sword_y))
+        self.screen.blit(self.image, (self.image_rect.x, self.image_rect.y))
+        # if self.right:
+        #     self.screen.blit(self.sword_rt, (self.image_rect.x, self.image_rect.y))
+        # else:
+        #     self.screen.blit(self.sword_lt, (self.image_rect.x, self.image_rect.y))
+
 
 
 
@@ -312,8 +348,6 @@ class player(pygame.sprite.Sprite):
                 # print('HIT')
                 tile[1].x += dx
 
-
-
     def update(self):
         dx = 0
         dy = 0
@@ -486,7 +520,6 @@ class player(pygame.sprite.Sprite):
 
     def get_data(self):
         return self.image_rect.x, self.image_rect.y, self.right, self.tile_set, self.plant_set
-
 
 
 
@@ -685,9 +718,10 @@ moon_bg = pygame.image.load(moon_bg).convert_alpha()
 
 ###################################################################################
 
+
 # MAIN LOOP
 while True:
-
+    counter = 0
     keys = pygame.key.get_pressed()
 
     for event in pygame.event.get():
@@ -698,10 +732,9 @@ while True:
             pygame.quit()
             sys.exit()
 
-    if keys[pygame.K_SPACE]:
-        x, y, right, tile_set, plant_set = ninja.get_data()
-        throwing_sword = sword(x, y, right, tile_set, plant_set)
-        throwing_sword.display_sword()
+
+
+
 
     screen.blit(moon_bg, (0,0))
 
@@ -710,9 +743,15 @@ while True:
     level_1.draw()
     level_1_plants.draw_plants()
 
+    if keys[pygame.K_SPACE]:
+        counter += 1
+        if counter == 1:
+            x, y, right, tile_set, plant_set = ninja.get_data()
+            throwing_sword = sword(x, y, right, tile_set, plant_set, screen)
+            throwing_sword.move_sword()
+            counter = 0
 
     ninja.update()
-
 
 
     pygame.display.flip()
