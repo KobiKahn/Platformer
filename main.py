@@ -112,6 +112,7 @@ class SpriteSheet:
 # THROWING KNIFE
 class sword(pygame.sprite.Sprite):
     def __init__(self, x, y, right, tile_set, plant_set, screen):
+        super().__init__()
         self.screen = screen
 
         # NINJA SWORD LEFT
@@ -146,18 +147,14 @@ class sword(pygame.sprite.Sprite):
                     # print('COLLISION RIGHT')
                     self.collide = True
                     self.sword_vel = 0
-                else:
-                    # print('NO COLLISION')
-                    self.collide = False
+
             else:
                 if tile[1].colliderect(self.image_rect.x + self.sword_vel, self.image_rect.y, self.image_rect.width, self.image_rect.height):
                     # print('COLLISION LEFT')
                     self.collide = True
                     self.sword_vel = 0
-                else:
-                    # print('NO COLLISION')
-                    self.collide = False
-        return(self.collide)
+
+        return self.collide
 
     def move_sword(self):
         if self.right:
@@ -167,15 +164,16 @@ class sword(pygame.sprite.Sprite):
             self.image = self.sword_lt
             self.sword_vel = -5
 
-        self.collide = self.collisions()
+        self.collisions()
 
         if self.collide == False:
-            print(self.collide)
             self.image_rect.x += self.sword_vel
             self.display_sword()
+
         else:
-            print('KILL')
             self.kill()
+
+        return self.collide
 
     def display_sword(self):
         # print(self.sword_x, self.sword_y)
@@ -721,11 +719,14 @@ ninja = player('SamuraiLight.png', 410, 495, layout_list, plant_list)
 moon_bg = 'Moon-Mountain-BG.png'
 moon_bg = pygame.image.load(moon_bg).convert_alpha()
 
-
+sword_group = pygame.sprite.Group()
 
 ###################################################################################
 
 shooting = False
+knife_total = 0
+
+cooldown_tracker = 0
 # MAIN LOOP
 while True:
     counter = 0
@@ -740,9 +741,6 @@ while True:
             sys.exit()
 
 
-
-
-
     screen.blit(moon_bg, (0,0))
 
     # draw_grid(screen_w, screen_h, block_size)
@@ -752,15 +750,33 @@ while True:
 
     ninja.update()
 
-    if keys[pygame.K_SPACE]:
-        shooting = True
-        x, y, right, tile_set, plant_set = ninja.get_data()
-        throwing_sword = sword(x, y, right, tile_set, plant_set, screen)
-        throwing_sword.move_sword()
+
+    cooldown_tracker += clock.get_time()
+    if cooldown_tracker > 100:
+        cooldown_tracker = 0
+
+    if keys[pygame.K_SPACE] and cooldown_tracker == 0:
+        if knife_total >= 3:
+            knife_max = True
+
+        else:
+            knife_total += 1
+            knife_max = False
+
+        if knife_max == False:
+            shooting = True
+            x, y, right, tile_set, plant_set = ninja.get_data()
+            throwing_sword = sword(x, y, right, tile_set, plant_set, screen)
+            sword_group.add(throwing_sword)
 
     if shooting:
-        throwing_sword.move_sword()
+        print('SHOOTING')
+        for knife in sword_group():
+            knife.move_sword()
 
+            if knife.move_sword() == True:
+                if knife_total >= 0:
+                    knife_total -= 1
 
 
     pygame.display.flip()
