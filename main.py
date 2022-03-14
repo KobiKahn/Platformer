@@ -723,10 +723,15 @@ sword_group = pygame.sprite.Group()
 
 ###################################################################################
 
+E_run_img = 'E_run_0.png'
+E_run = pygame.image.load(E_run_img).convert_alpha()
+E_run = pygame.transform.scale(E_run, (120, 140))
+
 shooting = False
 knife_total = 0
 
 cooldown_tracker = 0
+
 # MAIN LOOP
 while True:
     counter = 0
@@ -752,10 +757,12 @@ while True:
 
 
     cooldown_tracker += clock.get_time()
-    if cooldown_tracker > 100:
+
+    if cooldown_tracker > 200:
         cooldown_tracker = 0
 
     if keys[pygame.K_SPACE] and cooldown_tracker == 0:
+        shooting = True
         if knife_total >= 3:
             knife_max = True
 
@@ -764,20 +771,27 @@ while True:
             knife_max = False
 
         if knife_max == False:
-            shooting = True
             x, y, right, tile_set, plant_set = ninja.get_data()
             throwing_sword = sword(x, y, right, tile_set, plant_set, screen)
             sword_group.add(throwing_sword)
+            # throwing_sword.move_sword()
 
     if shooting:
-        print('SHOOTING')
-        for knife in sword_group():
+
+        x = 0
+        for knife in sword_group.sprites():
             knife.move_sword()
 
             if knife.move_sword() == True:
                 if knife_total >= 0:
                     knife_total -= 1
+            x += 1
+        if x == 0:
+            knife_total = 0
 
+
+
+    screen.blit(E_run, (500, 220))
 
     pygame.display.flip()
     clock.tick(FPS)
