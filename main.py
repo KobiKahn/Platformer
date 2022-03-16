@@ -108,6 +108,106 @@ class SpriteSheet:
 
         return self.images_at(sprite_rects, colorkey)
 
+# ENEMY CLASS
+class enemy(pygame.sprite.Sprite):
+    def __init__(self, picture_path, x, y, tile_set):
+        self.tile_set = tile_set
+
+        self.ninja_sheet = SpriteSheet(picture_path)
+
+        self.last = pygame.time.get_ticks()
+        self.image_delay = 100
+        self.current_frame = 0
+
+        self.right = True
+        self.left = False
+
+
+
+        self.ninja_idle_rt = self.ninja_sheet.image_at((62, 79, 196, 239), (0,0,0))
+        self.ninja_idle_rt = pygame.transform.scale(self.ninja_idle_rt, (block_size * 1.15, block_size * 1.25))
+        self.ninja_idle_lt = pygame.transform.flip(self.ninja_idle_rt, True, False)
+
+        self.image = self.ninja_idle_rt
+        self.image_rect = self.image.get_rect()
+
+        self.image_rect.x = x
+        self.image_rect.y = y
+
+
+        # ANIMATIONS
+        self.ninja_run_rt_wrong = []
+        self.ninja_run_rt = []
+
+        # RUN
+        self.ninja_run_rt_1 = self.ninja_sheet.image_at((68, 1230, 190, 234), -1)
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_1)
+
+        self.ninja_run_rt_2 = self.ninja_sheet.image_at((315, 1225, 191, 238), -1)
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_2)
+
+        self.ninja_run_rt_3 = self.ninja_sheet.image_at((563, 1222, 191, 237), -1)
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_3)
+
+        self.ninja_run_rt_4 = self.ninja_sheet.image_at((804, 1225, 184, 236), -1)
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_4)
+
+        self.ninja_run_rt_5 = self.ninja_sheet.image_at((1015, 1227, 176, 237), - 1)
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_5)
+
+        self.ninja_run_rt_6 = self.ninja_run_rt_5
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_6)
+
+        self.ninja_run_rt_7 = self.ninja_sheet.image_at((1427, 1227, 179, 234), - 1)
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_7)
+
+        self.ninja_run_rt_8 = self.ninja_run_rt_3
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_8)
+
+        self.ninja_run_rt_9 = self.ninja_run_rt_2
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_9)
+
+        self.ninja_run_rt_10 = self.ninja_run_rt_1
+        self.ninja_run_rt_wrong.append(self.ninja_run_rt_10)
+
+        for enemy in self.ninja_run_rt_wrong:
+            enemy = pygame.transform.scale(enemy, (block_size * 1.15, block_size * 1.25))
+            self.ninja_run_rt.append(enemy)
+
+        self.ninja_run_lt = [pygame.transform.flip(enemy, True, False) for enemy in self.ninja_run_rt]
+
+
+    def update(self, free_move, cam_right, dx):
+        now = pygame.time.get_ticks()
+        self.free_move = free_move
+        self.cam_right = cam_right
+        self.dx = dx
+
+        if not free_move:
+            self.dx = 0
+            if self.cam_right:
+                self.image_rect.x -= 5
+
+            else:
+                self.image_rect.x += 5
+
+        else:
+            self.dx = 5
+
+        if (now - self.last) >= self.image_delay:
+            self.last = now
+
+            if (self.current_frame + 1) < len(self.ninja_run_rt):
+                self.current_frame += 1
+            else:
+                self.current_frame = 0
+            self.image = self.ninja_run_rt[self.current_frame]
+
+        # self.image_rect.x += dx
+        self.draw()
+
+    def draw(self):
+        screen.blit(self.image, self.image_rect)
 
 # THROWING KNIFE
 class sword(pygame.sprite.Sprite):
@@ -209,7 +309,7 @@ class player(pygame.sprite.Sprite):
 
         # IDLE
         self.ninja_idle_rt = self.ninja_sheet.image_at((444, 49, 141, 229), -1)
-        self.ninja_idle_rt = pygame.transform.scale(self.ninja_idle_rt, (block_size * .95, block_size * 1.25))
+        self.ninja_idle_rt = pygame.transform.scale(self.ninja_idle_rt, (block_size * .9, block_size * 1.25))
         self.ninja_idle_lt = pygame.transform.flip(self.ninja_idle_rt, True, False)
 
         self.image = self.ninja_idle_rt
@@ -257,7 +357,7 @@ class player(pygame.sprite.Sprite):
         self.ninja_run_rt_wrong.append(self.ninja_run_rt_10)
 
         for player in self.ninja_run_rt_wrong:
-            player = pygame.transform.scale(player, (block_size * .95, block_size * 1.25))
+            player = pygame.transform.scale(player, (block_size * .9, block_size * 1.25))
             self.ninja_run_rt.append(player)
 
         self.ninja_run_lt = [pygame.transform.flip(player, True, False) for player in self.ninja_run_rt]
@@ -354,6 +454,7 @@ class player(pygame.sprite.Sprite):
                 tile[1].x += dx
 
     def update(self):
+
         dx = 0
         dy = 0
 
@@ -516,6 +617,8 @@ class player(pygame.sprite.Sprite):
 
         self.image_rect.x += dx
         self.image_rect.y += dy
+
+        enemy_ninja.update(self.free_move, self.cam_right, dx)
 
         self.draw()
 
@@ -714,6 +817,8 @@ plant_list = level_1_plants.make_plant_layout()
 
 ninja = player('SamuraiLight.png', 410, 495, layout_list, plant_list)
 
+enemy_ninja = enemy('Ninja.png', 460, 495, layout_list)
+
 ################## IMAGES #######################
 # GAME BACKGROUND
 moon_bg = 'Moon-Mountain-BG.png'
@@ -756,6 +861,7 @@ while True:
     ninja.update()
 
 
+
     cooldown_tracker += clock.get_time()
 
     if cooldown_tracker > 200:
@@ -791,7 +897,7 @@ while True:
 
 
 
-    screen.blit(E_run, (500, 220))
+    # screen.blit(E_run, (500, 220))
 
     pygame.display.flip()
     clock.tick(FPS)
