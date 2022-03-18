@@ -122,7 +122,7 @@ class enemy(pygame.sprite.Sprite):
         self.right = True
         self.left = False
 
-
+        self.vel = 0
 
         self.ninja_idle_rt = self.ninja_sheet.image_at((62, 79, 196, 239), (0,0,0))
         self.ninja_idle_rt = pygame.transform.scale(self.ninja_idle_rt, (block_size * 1.15, block_size * 1.25))
@@ -177,22 +177,30 @@ class enemy(pygame.sprite.Sprite):
         self.ninja_run_lt = [pygame.transform.flip(enemy, True, False) for enemy in self.ninja_run_rt]
 
 
-    def update(self, free_move, cam_right, dx):
+    def update(self, free_move, cam_right, collision):
+        keys = pygame.key.get_pressed()
         now = pygame.time.get_ticks()
         self.free_move = free_move
         self.cam_right = cam_right
-        self.dx = dx
+        self.collision = collision
+
+        # print(self.collision)
 
         if not free_move:
-            self.dx = 0
-            if self.cam_right:
-                self.image_rect.x -= 5
+            if self.collision == False:
+                if keys[pygame.K_RIGHT]:
+                    self.vel = -5
+                    # self.image_rect.x -= 5
 
+                elif keys[pygame.K_LEFT]:
+                    self.vel = 5
+                    # self.image_rect.x += 5
+                else:
+                    self.vel = 0
+                    # self.image_rect.x += 0
             else:
-                self.image_rect.x += 5
+                self.vel = 0
 
-        else:
-            self.dx = 5
 
         if (now - self.last) >= self.image_delay:
             self.last = now
@@ -203,7 +211,7 @@ class enemy(pygame.sprite.Sprite):
                 self.current_frame = 0
             self.image = self.ninja_run_rt[self.current_frame]
 
-        # self.image_rect.x += dx
+        self.image_rect.x += self.vel
         self.draw()
 
     def draw(self):
@@ -284,7 +292,7 @@ class sword(pygame.sprite.Sprite):
 # PLAYER CLASS
 class player(pygame.sprite.Sprite):
     def __init__(self, picture_path, x, y, tile_set, plant_set):
-
+        self.collide = False
         self.tile_set = tile_set
         self.plant_set = plant_set
 
@@ -454,6 +462,7 @@ class player(pygame.sprite.Sprite):
                 tile[1].x += dx
 
     def update(self):
+        self.collide = False
 
         dx = 0
         dy = 0
@@ -587,9 +596,12 @@ class player(pygame.sprite.Sprite):
             for tile in self.tile_set:
                 if tile[1].colliderect(self.image_rect.x + 5, self.image_rect.y, self.image_rect.width, self.image_rect.height):
                     self.cam_right = False
+                    self.collide = True
 
                 elif tile[1].colliderect(self.image_rect.x - 5, self.image_rect.y, self.image_rect.width, self.image_rect.height):
                     self.cam_left = False
+                    self.collide = True
+
 
 # Y COLLISION DETECTION
         for tile in self.tile_set:
@@ -618,7 +630,7 @@ class player(pygame.sprite.Sprite):
         self.image_rect.x += dx
         self.image_rect.y += dy
 
-        enemy_ninja.update(self.free_move, self.cam_right, dx)
+        enemy_ninja.update(self.free_move, self.cam_right, self.collide)
 
         self.draw()
 
@@ -642,6 +654,7 @@ class Level:
         self.tile_plants = []
         self.block_size = block_size
 
+        self.enemy_sheet = SpriteSheet('Ninja.png')
         temple_sheet = SpriteSheet('Temple_spritesheet.png')
         gate_sheet = SpriteSheet('Japan_Gate.png')
 
@@ -682,6 +695,11 @@ class Level:
         self.pillar_bottom = pygame.transform.scale(self.pillar_bottom, (block_size, block_size))
 
         self.pillar_top = pygame.transform.flip(self.pillar_bottom, False, True)
+
+
+        # ENEMY INSTANCE
+        # self.enemy_idle_rt = self.enemy_sheet.image_at((62, 79, 196, 239), (0, 0, 0))
+        # self.enemy_idle_rt = pygame.transform.scale(self.enemy_idle_rt, (block_size * 1.15, block_size * 1.25))
 
     def make_layout(self):
         for i, row in enumerate(self.layout):
@@ -753,6 +771,13 @@ class Level:
 
                     tile = (self.gate, (image_rect))
                     self.tile_list.append(tile)
+
+                # elif col == 'E':
+                #     image_rect = self.enemy_idle_rt.get_rect()
+                #     image_rect.x = x_val
+                #     image_rect.y = y_val - 12
+                #     tile = (self.enemy_idle_rt, (image_rect))
+                #     self.tile_list.append(tile)
 
         return(self.tile_list)
 
@@ -828,9 +853,6 @@ sword_group = pygame.sprite.Group()
 
 ###################################################################################
 
-E_run_img = 'E_run_0.png'
-E_run = pygame.image.load(E_run_img).convert_alpha()
-E_run = pygame.transform.scale(E_run, (120, 140))
 
 shooting = False
 knife_total = 0
