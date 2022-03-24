@@ -110,14 +110,16 @@ class SpriteSheet:
 
 # ENEMY CLASS
 class enemy(pygame.sprite.Sprite):
-    def __init__(self, picture_path, x, y, tile_set):
+    def __init__(self, picture_path, x, y, tile_set, enemy_layout):
         self.tile_set = tile_set
-
+        self.enemy_layout = enemy_layout
         self.ninja_sheet = SpriteSheet(picture_path)
 
         self.last = pygame.time.get_ticks()
         self.image_delay = 100
         self.current_frame = 0
+
+        self.run_distance = 90
 
         self.right = True
         self.left = False
@@ -184,8 +186,6 @@ class enemy(pygame.sprite.Sprite):
         self.cam_right = cam_right
         self.collision = collision
 
-        # print(self.collision)
-
         if not free_move:
             if self.collision == False:
                 if keys[pygame.K_RIGHT]:
@@ -202,17 +202,43 @@ class enemy(pygame.sprite.Sprite):
                 self.vel = 0
 
 
-        if (now - self.last) >= self.image_delay:
-            self.last = now
+        if self.right:
 
-            if (self.current_frame + 1) < len(self.ninja_run_rt):
-                self.current_frame += 1
-            else:
-                self.current_frame = 0
-            self.image = self.ninja_run_rt[self.current_frame]
+            dx = 2
 
+            if (now - self.last) >= self.image_delay:
+                self.last = now
+
+                if (self.current_frame + 1) < len(self.ninja_run_rt):
+                    self.current_frame += 1
+                else:
+                    self.current_frame = 0
+                self.image = self.ninja_run_rt[self.current_frame]
+        else:
+
+            dx = -2
+
+            if (now - self.last) >= self.image_delay:
+                self.last = now
+
+                if (self.current_frame + 1) < len(self.ninja_run_lt):
+                    self.current_frame += 1
+                else:
+                    self.current_frame = 0
+                self.image = self.ninja_run_lt[self.current_frame]
+
+
+        # COLLISION
+        for tile in self.enemy_layout:
+            if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
+                dx *= -1
+
+
+# UPDATE PLAYER AND DRAW
+        self.image_rect.x += dx
         self.image_rect.x += self.vel
         self.draw()
+
 
     def draw(self):
         screen.blit(self.image, self.image_rect)
@@ -295,6 +321,7 @@ class player(pygame.sprite.Sprite):
         self.collide = False
         self.tile_set = tile_set
         self.plant_set = plant_set
+        self.enemy_layout = enemy_layout
 
         self.ninja_sheet = SpriteSheet(picture_path)
 
@@ -652,6 +679,7 @@ class Level:
         self.layout = layout
         self.tile_list = []
         self.tile_plants = []
+        self.enemy_layout = []
         self.block_size = block_size
 
         self.enemy_sheet = SpriteSheet('Ninja.png')
@@ -814,6 +842,23 @@ class Level:
 
         return(self.tile_plants)
 
+    def make_enemy_layout(self):
+        for i, row in enumerate(self.layout):
+            for j, col in enumerate(row):
+                x_val = j * self.block_size
+                y_val = i * self.block_size
+
+                if col == 'k':
+                    rectangle = pygame.Surface(self.block_size, self.block_size)
+                    image_rect = rectangle.get_rect()
+                    image_rect.x = x_val
+                    image_rect.y = y_val
+
+                    tile = (rectangle, (image_rect))
+                    self.enemy_layout.append(tile)
+
+        return(self.enemy_layout)
+
 
     def draw(self):
         for tile in self.tile_list:
@@ -839,10 +884,12 @@ layout_list = level_1.make_layout()
 level_1_plants = Level(levels.Level_1_plants, block_size)
 plant_list = level_1_plants.make_plant_layout()
 
+level_1_enemy = Level(levels.level_1_enemy, block_size)
+enemy_layout = level_1_enemy.make_enemy_layout()
 
 ninja = player('SamuraiLight.png', 410, 495, layout_list, plant_list)
 
-enemy_ninja = enemy('Ninja.png', 460, 495, layout_list)
+enemy_ninja = enemy('Ninja.png', 460, 495, layout_list, enemy_layout)
 
 ################## IMAGES #######################
 # GAME BACKGROUND
@@ -882,8 +929,6 @@ while True:
 
     ninja.update()
 
-
-
     cooldown_tracker += clock.get_time()
 
     if cooldown_tracker > 200:
@@ -905,7 +950,6 @@ while True:
             # throwing_sword.move_sword()
 
     if shooting:
-
         x = 0
         for knife in sword_group.sprites():
             knife.move_sword()
