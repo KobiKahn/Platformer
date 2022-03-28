@@ -232,6 +232,22 @@ class enemy(pygame.sprite.Sprite):
         for tile in self.enemy_layout:
             if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
                 dx *= -1
+                if self.right:
+                    self.left = True
+                    self.right = False
+                else:
+                    self.left = False
+                    self.right = True
+
+        for tile in self.tile_set:
+            if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
+                dx *= -1
+                if self.right:
+                    self.left = True
+                    self.right = False
+                else:
+                    self.left = False
+                    self.right = True
 
 
 # UPDATE PLAYER AND DRAW
@@ -242,6 +258,9 @@ class enemy(pygame.sprite.Sprite):
 
     def draw(self):
         screen.blit(self.image, self.image_rect)
+
+    def kill_enemy(self):
+        self.kill()
 
 # THROWING KNIFE
 class sword(pygame.sprite.Sprite):
@@ -300,6 +319,8 @@ class sword(pygame.sprite.Sprite):
 
         self.collisions()
 
+        # if self.spritecollide()
+
         if self.collide == False:
             self.image_rect.x += self.sword_vel
             self.display_sword()
@@ -317,7 +338,7 @@ class sword(pygame.sprite.Sprite):
 
 # PLAYER CLASS
 class player(pygame.sprite.Sprite):
-    def __init__(self, picture_path, x, y, tile_set, plant_set):
+    def __init__(self, picture_path, x, y, tile_set, plant_set, enemy_layout):
         self.collide = False
         self.tile_set = tile_set
         self.plant_set = plant_set
@@ -487,6 +508,8 @@ class player(pygame.sprite.Sprite):
             if not tile[1].colliderect(self.image_rect.x + (-1 * dx), self.image_rect.y, self.image_rect.width, self.image_rect.height):
                 # print('HIT')
                 tile[1].x += dx
+        for tile in self.enemy_layout:
+            tile[1].x += dx
 
     def update(self):
         self.collide = False
@@ -724,10 +747,9 @@ class Level:
 
         self.pillar_top = pygame.transform.flip(self.pillar_bottom, False, True)
 
+        self.rectangle = pygame.Surface((self.block_size, self.block_size))
+        self.rectangle.fill((0, 0, 0))
 
-        # ENEMY INSTANCE
-        # self.enemy_idle_rt = self.enemy_sheet.image_at((62, 79, 196, 239), (0, 0, 0))
-        # self.enemy_idle_rt = pygame.transform.scale(self.enemy_idle_rt, (block_size * 1.15, block_size * 1.25))
 
     def make_layout(self):
         for i, row in enumerate(self.layout):
@@ -849,24 +871,26 @@ class Level:
                 y_val = i * self.block_size
 
                 if col == 'k':
-                    rectangle = pygame.Surface(self.block_size, self.block_size)
-                    image_rect = rectangle.get_rect()
+
+                    image_rect = self.rectangle.get_rect()
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (rectangle, (image_rect))
+                    tile = (self.rectangle, (image_rect))
                     self.enemy_layout.append(tile)
 
         return(self.enemy_layout)
-
 
     def draw(self):
         for tile in self.tile_list:
             screen.blit(tile[0], tile[1])
 
-
     def draw_plants(self):
         for tile in self.tile_plants:
+            screen.blit(tile[0], tile[1])
+
+    def draw_enemy_block(self):
+        for tile in self.enemy_layout:
             screen.blit(tile[0], tile[1])
 
 
@@ -887,9 +911,9 @@ plant_list = level_1_plants.make_plant_layout()
 level_1_enemy = Level(levels.level_1_enemy, block_size)
 enemy_layout = level_1_enemy.make_enemy_layout()
 
-ninja = player('SamuraiLight.png', 410, 495, layout_list, plant_list)
+ninja = player('SamuraiLight.png', 410, 495, layout_list, plant_list, enemy_layout)
 
-enemy_ninja = enemy('Ninja.png', 460, 495, layout_list, enemy_layout)
+enemy_ninja = enemy('Ninja.png', 550, 238, layout_list, enemy_layout)
 
 ################## IMAGES #######################
 # GAME BACKGROUND
@@ -926,6 +950,7 @@ while True:
 
     level_1.draw()
     level_1_plants.draw_plants()
+    # level_1_enemy.draw_enemy_block()
 
     ninja.update()
 
