@@ -249,18 +249,17 @@ class enemy(pygame.sprite.Sprite):
                     self.left = False
                     self.right = True
 
-
 # UPDATE PLAYER AND DRAW
         self.image_rect.x += dx
         self.image_rect.x += self.vel
         self.draw()
 
+    def kill_enemy(self):
+        self.image_rect.x = 1000000
 
     def draw(self):
         screen.blit(self.image, self.image_rect)
 
-    def kill_enemy(self):
-        self.kill()
 
 # THROWING KNIFE
 class sword(pygame.sprite.Sprite):
@@ -300,7 +299,6 @@ class sword(pygame.sprite.Sprite):
                     # print('COLLISION RIGHT')
                     self.collide = True
                     self.sword_vel = 0
-
             else:
                 if tile[1].colliderect(self.image_rect.x + self.sword_vel, self.image_rect.y, self.image_rect.width, self.image_rect.height):
                     # print('COLLISION LEFT')
@@ -326,9 +324,12 @@ class sword(pygame.sprite.Sprite):
             self.display_sword()
 
         else:
-            self.kill()
+            self.kill_sword()
 
         return self.collide
+
+    def kill_sword(self):
+        self.kill()
 
     def display_sword(self):
         # print(self.sword_x, self.sword_y)
@@ -374,6 +375,7 @@ class player(pygame.sprite.Sprite):
         self.image_rect.x = x
         self.image_rect.y = y
 
+        self.player_dead = False
 
         # RUNNING ANIMATIONS
         # self.ninja_run_rt_list_wrong = self.ninja_sheet.load_grid_images(1, 10, 450, 60, 1026, 0, 155, 228, -1)
@@ -684,6 +686,9 @@ class player(pygame.sprite.Sprite):
 
         self.draw()
 
+    def player_die(self):
+        self.player_dead = True
+
     def draw(self):
         screen.blit(self.image, self.image_rect)
         # pygame.draw.rect(screen, (255,255,255), self.image_rect, 2)
@@ -982,10 +987,19 @@ while True:
             if knife.move_sword() == True:
                 if knife_total >= 0:
                     knife_total -= 1
+
+            if enemy_ninja.image_rect.colliderect(knife.image_rect.x, knife.image_rect.y, knife.image_rect.width, knife.image_rect.height):
+                # print('HIT ENEMY')
+                knife.kill_sword()
+                enemy_ninja.kill_enemy()
             x += 1
         if x == 0:
             knife_total = 0
 
+    # PLAYER DETECTION WITH ENEMY
+    if enemy_ninja.image_rect.colliderect(ninja.image_rect.x, ninja.image_rect.y, ninja.image_rect.width, ninja.image_rect.height):
+        # print('HI')
+        ninja.player_die()
 
 
     # screen.blit(E_run, (500, 220))
