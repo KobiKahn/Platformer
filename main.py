@@ -119,8 +119,6 @@ class enemy(pygame.sprite.Sprite):
         self.image_delay = 100
         self.current_frame = 0
 
-        self.run_distance = 90
-
         self.right = True
         self.left = False
 
@@ -203,10 +201,11 @@ class enemy(pygame.sprite.Sprite):
                     # self.image_rect.x += 0
             else:
                 self.vel = 0
+        else:
+            self.vel = 0
 
 
         if self.right:
-
             dx = 2
 
             if (now - self.last) >= self.image_delay:
@@ -217,8 +216,8 @@ class enemy(pygame.sprite.Sprite):
                 else:
                     self.current_frame = 0
                 self.image = self.ninja_run_rt[self.current_frame]
-        else:
 
+        else:
             dx = -2
 
             if (now - self.last) >= self.image_delay:
@@ -323,8 +322,6 @@ class sword(pygame.sprite.Sprite):
 
         self.collisions()
 
-        # if self.spritecollide()
-
         if self.collide == False:
             self.image_rect.x += self.sword_vel
             self.display_sword()
@@ -338,7 +335,6 @@ class sword(pygame.sprite.Sprite):
         self.kill()
 
     def display_sword(self):
-        # print(self.sword_x, self.sword_y)
         self.screen.blit(self.image, (self.image_rect.x, self.image_rect.y))
 
 
@@ -718,7 +714,6 @@ class Level:
     def __init__(self, layout, block_size):
         self.layout = layout
         self.block_size = block_size
-
         self.tile_list = []
 
         self.enemy_sheet = SpriteSheet('Ninja.png')
@@ -729,11 +724,9 @@ class Level:
         self.gate = self.gate_sheet.image_at((228, 372, 732, 541)).convert_alpha()
         self.gate = pygame.transform.scale(self.gate, (self.block_size, self.block_size))
 
-
         # GROUND
         self.temple_ground = self.temple_sheet.image_at((290, 480, 32, 32)).convert_alpha()
         self.temple_ground = pygame.transform.scale(self.temple_ground, (self.block_size, self.block_size))
-
 
         # PLANTS
         self.tree_big = self.temple_sheet.image_at((396, 296, 107, 109)).convert_alpha()
@@ -744,7 +737,6 @@ class Level:
 
         self.hedge_small = self.temple_sheet.image_at((370, 268, 34, 20)).convert_alpha()
         self.hedge_small = pygame.transform.scale(self.hedge_small, (self.block_size * 1.5, self.block_size))
-
 
         # TEMPLE PLATFORMS
         self.platform_big = self.temple_sheet.image_at((256, 288, 64, 24)).convert_alpha()
@@ -766,6 +758,7 @@ class Level:
         self.rectangle = pygame.Surface((self.block_size, self.block_size))
         self.rectangle.fill((0, 0, 0))
 
+# MAKE THE LAYOUT
         for i, row in enumerate(self.layout):
             for j, col in enumerate(row):
                 x_val = j * self.block_size
@@ -876,6 +869,9 @@ class Level:
 
 
     def reset_level(self):
+        for tile in self.tile_list:
+            tile[1][0] = 1000000
+
         self.__init__(self.layout, self.block_size)
 
 

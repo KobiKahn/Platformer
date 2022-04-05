@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Platformer.iml" filepath="$PROJECT_DIR$/.idea/Platformer.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../Sprites_Shooting_Range/.idea/Sprites_Shooting_Range.iml" filepath="$PROJECT_DIR$/../Sprites_Shooting_Range/.idea/Sprites_Shooting_Range.iml" />
     </modules>
   </component>
 </project>
