@@ -515,6 +515,7 @@ class player(pygame.sprite.Sprite):
             if not tile[1].colliderect(self.image_rect.x + (-1 * dx), self.image_rect.y, self.image_rect.width, self.image_rect.height):
                 # print('HIT')
                 tile[1].x += dx
+
         for tile in self.enemy_layout:
             tile[1].x += dx
 
@@ -608,8 +609,6 @@ class player(pygame.sprite.Sprite):
                         self.current_frame = 0
                     self.image = self.ninja_run_lt[self.current_frame]
 
-                # self.camera_move(5)
-
             # CHECK IF FREE MOVE
             elif self.image_rect.x >= screen_w - 200:
                 self.free_move = True
@@ -688,7 +687,7 @@ class player(pygame.sprite.Sprite):
         self.image_rect.x += dx
         self.image_rect.y += dy
 
-        enemy_ninja.update(self.free_move, self.cam_right, self.collide)
+        enemy.update(self.free_move, self.cam_right, self.collide)
 
         self.draw()
 
@@ -714,7 +713,12 @@ class Level:
     def __init__(self, layout, block_size):
         self.layout = layout
         self.block_size = block_size
+
         self.tile_list = []
+        self.plant_list = []
+        self.enemy_layout = []
+        self.door_list = []
+        self.enemy_list = []
 
         self.enemy_sheet = SpriteSheet('Ninja.png')
         self.temple_sheet = SpriteSheet('Temple_spritesheet.png')
@@ -826,7 +830,7 @@ class Level:
                     image_rect.y = y_val
 
                     tile = (self.gate, (image_rect))
-                    self.tile_list.append(tile)
+                    self.door_list.append(tile)
 
                 if col == 'b':
                     image_rect = self.tree_big.get_rect()
@@ -834,7 +838,7 @@ class Level:
                     image_rect.y = y_val
 
                     tile = (self.tree_big, (image_rect))
-                    self.tile_list.append(tile)
+                    self.plant_list.append(tile)
 
                 elif col == 's':
                     image_rect = self.tree_small.get_rect()
@@ -842,7 +846,7 @@ class Level:
                     image_rect.y = y_val
 
                     tile = (self.tree_small, (image_rect))
-                    self.tile_list.append(tile)
+                    self.plant_list.append(tile)
 
                 elif col == 'h':
                     image_rect = self.hedge_small.get_rect()
@@ -850,7 +854,7 @@ class Level:
                     image_rect.y = y_val
 
                     tile = (self.hedge_small, (image_rect))
-                    self.tile_list.append(tile)
+                    self.plant_list.append(tile)
 
                 if col == 'k':
                     image_rect = self.rectangle.get_rect()
@@ -858,20 +862,39 @@ class Level:
                     image_rect.y = y_val
 
                     tile = (self.rectangle, (image_rect))
-                    self.tile_list.append(tile)
+                    self.enemy_layout.append(tile)
+
+                elif col == 'N':
+                    self.ninja = player('SamuraiLight.png', x_val, y_val, self.tile_list, self.plant_list, self.enemy_layout)
+
+                elif col == 'E':
+                    self.enemy = enemy('Ninja.png', x_val, y_val - 13, self.tile_list, self.enemy_layout)
+
+
 
     def get_layout(self):
         return(self.tile_list)
+    def get_plants(self):
+        return(self.plant_list)
+    def get_enemy_layout(self):
+        return(self.enemy_layout)
+
+    def get_characters(self):
+        return(self.ninja, self.enemy)
 
     def draw(self):
         for tile in self.tile_list:
             screen.blit(tile[0], tile[1])
 
+    def draw_plants(self):
+        for tile in self.plant_list:
+            screen.blit(tile[0], tile[1])
+
+    def draw_enemy_layout(self):
+        for tile in self.enemy_layout:
+            screen.blit(tile[0], tile[1])
 
     def reset_level(self):
-        for tile in self.tile_list:
-            tile[1][0] = 1000000
-
         self.__init__(self.layout, self.block_size)
 
 
@@ -887,14 +910,12 @@ level_1 = Level(levels.Level_1, block_size)
 level_1_layout = level_1.get_layout()
 
 level_1_P = Level(levels.Level_1_plants, block_size)
-level_1_plants = level_1_P.get_layout()
+level_1_plants = level_1_P.get_plants()
 
 level_1_E = Level(levels.level_1_enemy, block_size)
-level_1_enemy = level_1_E.get_layout()
+level_1_enemy = level_1_E.get_enemy_layout()
 
-ninja = player('SamuraiLight.png', 410, 495, level_1_layout, level_1_plants, level_1_enemy)
-
-enemy_ninja = enemy('Ninja.png', 550, 238, level_1_layout, level_1_enemy)
+ninja, enemy = level_1.get_characters()
 
 ################## IMAGES #######################
 # GAME BACKGROUND
@@ -924,16 +945,16 @@ while True:
             pygame.quit()
             sys.exit()
 
-
     screen.blit(moon_bg, (0,0))
 
     # draw_grid(screen_w, screen_h, block_size)
 
     level_1.draw()
-    level_1_P.draw()
-    # level_1_E.draw()
+    level_1_P.draw_plants()
+    level_1_E.draw_enemy_layout()
 
     ninja.update()
+
 
     cooldown_tracker += clock.get_time()
 
@@ -964,20 +985,20 @@ while True:
                 if knife_total >= 0:
                     knife_total -= 1
 
-            if enemy_ninja.image_rect.colliderect(knife.image_rect.x, knife.image_rect.y, knife.image_rect.width, knife.image_rect.height):
+            if enemy.image_rect.colliderect(knife.image_rect.x, knife.image_rect.y, knife.image_rect.width, knife.image_rect.height):
                 # print('HIT ENEMY')
                 knife.kill_sword()
-                enemy_ninja.kill_enemy()
+                enemy.kill_enemy()
             x += 1
         if x == 0:
             knife_total = 0
 
     # PLAYER DETECTION WITH ENEMY
-    if enemy_ninja.image_rect.colliderect(ninja.image_rect.x, ninja.image_rect.y, ninja.image_rect.width, ninja.image_rect.height):
+    if enemy.image_rect.colliderect(ninja.image_rect.x, ninja.image_rect.y, ninja.image_rect.width, ninja.image_rect.height):
         level_1.reset_level()
         level_1_P.reset_level()
         level_1_E.reset_level()
-        enemy_ninja.reset_enemy()
+        enemy.reset_enemy()
         ninja.reset_player()
 
 
