@@ -109,8 +109,9 @@ class SpriteSheet:
         return self.images_at(sprite_rects, colorkey)
 
 # ENEMY CLASS
-class enemy(pygame.sprite.Sprite):
+class Enemy(pygame.sprite.Sprite):
     def __init__(self, picture_path, x, y, tile_set, enemy_layout):
+        super().__init__()
         self.tile_set = tile_set
         self.enemy_layout = enemy_layout
         self.ninja_sheet = SpriteSheet(picture_path)
@@ -129,13 +130,10 @@ class enemy(pygame.sprite.Sprite):
         self.ninja_idle_lt = pygame.transform.flip(self.ninja_idle_rt, True, False)
 
         self.image = self.ninja_idle_rt
-        self.image_rect = self.image.get_rect()
+        self.rect = self.image.get_rect()
 
-        self.image_originalx = 550
-        self.image_originaly = 238
-
-        self.image_rect.x = x
-        self.image_rect.y = y
+        self.rect.x = x
+        self.rect.y = y
 
 
         # ANIMATIONS
@@ -191,14 +189,14 @@ class enemy(pygame.sprite.Sprite):
             if self.collision == False:
                 if keys[pygame.K_RIGHT]:
                     self.vel = -5
-                    # self.image_rect.x -= 5
+                    # self.rect.x -= 5
 
                 elif keys[pygame.K_LEFT]:
                     self.vel = 5
-                    # self.image_rect.x += 5
+                    # self.rect.x += 5
                 else:
                     self.vel = 0
-                    # self.image_rect.x += 0
+                    # self.rect.x += 0
             else:
                 self.vel = 0
         else:
@@ -232,7 +230,7 @@ class enemy(pygame.sprite.Sprite):
 
         # COLLISION
         for tile in self.enemy_layout:
-            if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
+            if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.rect.width, self.rect.height):
                 dx *= -1
                 if self.right:
                     self.left = True
@@ -242,7 +240,7 @@ class enemy(pygame.sprite.Sprite):
                     self.right = True
 
         for tile in self.tile_set:
-            if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
+            if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.rect.width, self.rect.height):
                 dx *= -1
                 if self.right:
                     self.left = True
@@ -252,19 +250,16 @@ class enemy(pygame.sprite.Sprite):
                     self.right = True
 
 # UPDATE PLAYER AND DRAW
-        self.image_rect.x += dx
-        self.image_rect.x += self.vel
+        self.rect.x += dx
+        self.rect.x += self.vel
         self.draw()
 
     def kill_enemy(self):
-        self.image_rect.x = 1000000
+        self.rect.x = 1000000
 
     def draw(self):
-        screen.blit(self.image, self.image_rect)
+        screen.blit(self.image, self.rect)
 
-    def reset_enemy(self):
-        self.image_rect.x = self.image_originalx
-        self.image_rect.y = self.image_originaly
 
 # THROWING KNIFE
 class sword(pygame.sprite.Sprite):
@@ -283,9 +278,9 @@ class sword(pygame.sprite.Sprite):
         self.sword_rt = pygame.transform.scale(self.sword_rt, (40, 20))
 
         self.image = self.sword_rt
-        self.image_rect = self.image.get_rect()
-        self.image_rect.x = x
-        self.image_rect.y = y + 30
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y + 30
 
         self.sword_vel = 5
 
@@ -300,12 +295,12 @@ class sword(pygame.sprite.Sprite):
     def collisions(self):
         for tile in self.tile_set:
             if self.right:
-                if tile[1].colliderect(self.image_rect.x - self.image_rect.width / 2 + 20, self.image_rect.y, self.image_rect.width, self.image_rect.height):
+                if tile[1].colliderect(self.rect.x - self.rect.width / 2 + 20, self.rect.y, self.rect.width, self.rect.height):
                     # print('COLLISION RIGHT')
                     self.collide = True
                     self.sword_vel = 0
             else:
-                if tile[1].colliderect(self.image_rect.x + self.sword_vel, self.image_rect.y, self.image_rect.width, self.image_rect.height):
+                if tile[1].colliderect(self.rect.x + self.sword_vel, self.rect.y, self.rect.width, self.rect.height):
                     # print('COLLISION LEFT')
                     self.collide = True
                     self.sword_vel = 0
@@ -323,7 +318,7 @@ class sword(pygame.sprite.Sprite):
         self.collisions()
 
         if self.collide == False:
-            self.image_rect.x += self.sword_vel
+            self.rect.x += self.sword_vel
             self.display_sword()
 
         else:
@@ -335,12 +330,12 @@ class sword(pygame.sprite.Sprite):
         self.kill()
 
     def display_sword(self):
-        self.screen.blit(self.image, (self.image_rect.x, self.image_rect.y))
+        self.screen.blit(self.image, (self.rect.x, self.rect.y))
 
 
 
 # PLAYER CLASS
-class player(pygame.sprite.Sprite):
+class Player(pygame.sprite.Sprite):
     def __init__(self, picture_path, x, y, tile_set, plant_set, enemy_layout):
         self.collide = False
         self.tile_set = tile_set
@@ -372,13 +367,10 @@ class player(pygame.sprite.Sprite):
         self.ninja_idle_lt = pygame.transform.flip(self.ninja_idle_rt, True, False)
 
         self.image = self.ninja_idle_rt
-        self.image_rect = self.image.get_rect()
+        self.rect = self.image.get_rect()
 
-        self.image_original_x = 410
-        self.image_original_y = 495
-
-        self.image_rect.x = x
-        self.image_rect.y = y
+        self.rect.x = x
+        self.rect.y = y
 
         self.player_dead = False
 
@@ -512,7 +504,7 @@ class player(pygame.sprite.Sprite):
             tile[1].x += dx
 
         for tile in self.tile_set:
-            if not tile[1].colliderect(self.image_rect.x + (-1 * dx), self.image_rect.y, self.image_rect.width, self.image_rect.height):
+            if not tile[1].colliderect(self.rect.x + (-1 * dx), self.rect.y, self.rect.width, self.rect.height):
                 # print('HIT')
                 tile[1].x += dx
 
@@ -527,7 +519,7 @@ class player(pygame.sprite.Sprite):
 
         keys = pygame.key.get_pressed()
 
-        if self.image_rect.x > 200 and self.image_rect.x < screen_w - 200:
+        if self.rect.x > 200 and self.rect.x < screen_w - 200:
             self.free_move = True
 
         else:
@@ -553,7 +545,7 @@ class player(pygame.sprite.Sprite):
                     self.image = self.ninja_run_rt[self.current_frame]
 
 
-            elif self.image_rect.x >= screen_w - 200:
+            elif self.rect.x >= screen_w - 200:
                 self.free_move = False
                 self.cam_right = True
                 self.cam_left = False
@@ -568,9 +560,9 @@ class player(pygame.sprite.Sprite):
                     self.image = self.ninja_run_rt[self.current_frame]
 
 
-            elif self.image_rect.x <= 200:
+            elif self.rect.x <= 200:
                 self.free_move = True
-                self.image_rect.x = 201
+                self.rect.x = 201
 
 
             # RUN LEFT
@@ -594,7 +586,7 @@ class player(pygame.sprite.Sprite):
                     self.image = self.ninja_run_lt[self.current_frame]
 
             # CHECK IF CAMERA MOVE OR NOT
-            elif self.image_rect.x <= 200:
+            elif self.rect.x <= 200:
                 self.free_move = False
                 self.cam_left = True
                 self.cam_right = False
@@ -610,9 +602,9 @@ class player(pygame.sprite.Sprite):
                     self.image = self.ninja_run_lt[self.current_frame]
 
             # CHECK IF FREE MOVE
-            elif self.image_rect.x >= screen_w - 200:
+            elif self.rect.x >= screen_w - 200:
                 self.free_move = True
-                self.image_rect.x = screen_w - 201
+                self.rect.x = screen_w - 201
 
         # IDLE
         else:
@@ -647,31 +639,31 @@ class player(pygame.sprite.Sprite):
 # X COLLISION DETECTION
         if self.free_move:
             for tile in self.tile_set:
-                if tile[1].colliderect(self.image_rect.x + dx, self.image_rect.y, self.image_rect.width, self.image_rect.height):
+                if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.rect.width, self.rect.height):
                     dx = 0
         else:
             for tile in self.tile_set:
-                if tile[1].colliderect(self.image_rect.x + 5, self.image_rect.y, self.image_rect.width, self.image_rect.height):
+                if tile[1].colliderect(self.rect.x + 5, self.rect.y, self.rect.width, self.rect.height):
                     self.cam_right = False
                     self.collide = True
 
-                elif tile[1].colliderect(self.image_rect.x - 5, self.image_rect.y, self.image_rect.width, self.image_rect.height):
+                elif tile[1].colliderect(self.rect.x - 5, self.rect.y, self.rect.width, self.rect.height):
                     self.cam_left = False
                     self.collide = True
 
 
 # Y COLLISION DETECTION
         for tile in self.tile_set:
-            if tile[1].colliderect(self.image_rect.x, self.image_rect.y + dy, self.image_rect.width, self.image_rect.height):
+            if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.rect.width, self.rect.height):
 
                 if self.y_vel < 0:
-                    dy = tile[1].bottom - self.image_rect.top
+                    dy = tile[1].bottom - self.rect.top
                     self.y_vel = 0
                     self.jumping = False
                     self.falling = True
 
                 elif self.y_vel > 0:
-                    dy = tile[1].top - self.image_rect.bottom
+                    dy = tile[1].top - self.rect.bottom
                     self.y_vel = 0
                     self.jumping = False
                     self.falling = False
@@ -684,24 +676,20 @@ class player(pygame.sprite.Sprite):
             self.camera_move(-5)
             dx = 0
 
-        self.image_rect.x += dx
-        self.image_rect.y += dy
+        self.rect.x += dx
+        self.rect.y += dy
 
         enemy.update(self.free_move, self.cam_right, self.collide)
 
         self.draw()
 
-    def reset_player(self):
-        self.image_rect.x = self.image_original_x
-        self.image_rect.y = self.image_original_y
-
 
     def draw(self):
-        screen.blit(self.image, self.image_rect)
-        # pygame.draw.rect(screen, (255,255,255), self.image_rect, 2)
+        screen.blit(self.image, self.rect)
+        # pygame.draw.rect(screen, (255,255,255), self.rect, 2)
 
     def get_data(self):
-        return self.image_rect.x, self.image_rect.y, self.right, self.tile_set, self.plant_set
+        return self.rect.x, self.rect.y, self.right, self.tile_set, self.plant_set
 
 
 
@@ -715,10 +703,6 @@ class Level:
         self.block_size = block_size
 
         self.tile_list = []
-        self.plant_list = []
-        self.enemy_layout = []
-        self.door_list = []
-        self.enemy_list = []
 
         self.enemy_sheet = SpriteSheet('Ninja.png')
         self.temple_sheet = SpriteSheet('Temple_spritesheet.png')
@@ -773,7 +757,7 @@ class Level:
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (self.temple_ground, (image_rect))
+                    tile = (self.temple_ground, (image_rect), 'b')
                     self.tile_list.append(tile)
 
                 elif col == 'B':
@@ -781,7 +765,7 @@ class Level:
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (self.platform_big, (image_rect))
+                    tile = (self.platform_big, (image_rect), 'b')
                     self.tile_list.append(tile)
 
                 elif col == 'p':
@@ -789,7 +773,7 @@ class Level:
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (self.pillar_bottom, (image_rect))
+                    tile = (self.pillar_bottom, (image_rect), 'b')
                     self.tile_list.append(tile)
 
                 elif col == 'P':
@@ -797,7 +781,7 @@ class Level:
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (self.pillar_top, (image_rect))
+                    tile = (self.pillar_top, (image_rect), 'b')
                     self.tile_list.append(tile)
 
                 elif col == 'S':
@@ -805,7 +789,7 @@ class Level:
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (self.platform_small, (image_rect))
+                    tile = (self.platform_small, (image_rect), 'b')
                     self.tile_list.append(tile)
 
                 elif col == 'X':
@@ -813,7 +797,7 @@ class Level:
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (self.platform_xsmall, (image_rect))
+                    tile = (self.platform_xsmall, (image_rect), 'b')
                     self.tile_list.append(tile)
 
                 elif col == 'L':
@@ -821,7 +805,7 @@ class Level:
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (self.platform_long, (image_rect))
+                    tile = (self.platform_long, (image_rect), 'b')
                     self.tile_list.append(tile)
 
                 elif col =='d':
@@ -829,55 +813,63 @@ class Level:
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (self.gate, (image_rect))
-                    self.door_list.append(tile)
+                    tile = (self.gate, (image_rect), 'g')
+                    self.tile_list.append(tile)
 
                 if col == 'b':
                     image_rect = self.tree_big.get_rect()
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (self.tree_big, (image_rect))
-                    self.plant_list.append(tile)
+                    tile = (self.tree_big, (image_rect), 'p')
+                    self.tile_list.append(tile)
 
                 elif col == 's':
                     image_rect = self.tree_small.get_rect()
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (self.tree_small, (image_rect))
-                    self.plant_list.append(tile)
+                    tile = (self.tree_small, (image_rect), 'p')
+                    self.tile_list.append(tile)
 
                 elif col == 'h':
                     image_rect = self.hedge_small.get_rect()
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (self.hedge_small, (image_rect))
-                    self.plant_list.append(tile)
+                    tile = (self.hedge_small, (image_rect), 'p')
+                    self.tile_list.append(tile)
 
                 if col == 'k':
                     image_rect = self.rectangle.get_rect()
                     image_rect.x = x_val
                     image_rect.y = y_val
 
-                    tile = (self.rectangle, (image_rect))
-                    self.enemy_layout.append(tile)
+                    tile = (self.rectangle, (image_rect), 'e')
+                    self.tile_list.append(tile)
 
                 elif col == 'N':
-                    self.ninja = player('SamuraiLight.png', x_val, y_val, self.tile_list, self.plant_list, self.enemy_layout)
+                    self.ninja = Player('SamuraiLight.png', x_val, y_val, self.tile_list, self.plant_list, self.enemy_layout)
+                    # self.ninja_rect.x = x_val
+                    # self.ninja_rect.y = y_val
+                    # tile = (self.ninja, (self.ninja_rect))
+                    # self.tile_list.append(tile)
 
                 elif col == 'E':
-                    self.enemy = enemy('Ninja.png', x_val, y_val - 13, self.tile_list, self.enemy_layout)
+                    self.enemy = Enemy('Ninja.png', x_val, y_val - 13, self.tile_list, self.enemy_layout)
+                    # self.enemy_rect.x = x_val
+                    # self.enemy_rect.y = y_val
+                    # tile = (self.enemy, (self.enemy_rect))
+                    # self.tile_list.append(tile)
 
 
 
     def get_layout(self):
         return(self.tile_list)
-    def get_plants(self):
-        return(self.plant_list)
-    def get_enemy_layout(self):
-        return(self.enemy_layout)
+    # def get_plants(self):
+    #     return(self.plant_list)
+    # def get_enemy_layout(self):
+    #     return(self.enemy_layout)
 
     def get_characters(self):
         return(self.ninja, self.enemy)
@@ -886,13 +878,13 @@ class Level:
         for tile in self.tile_list:
             screen.blit(tile[0], tile[1])
 
-    def draw_plants(self):
-        for tile in self.plant_list:
-            screen.blit(tile[0], tile[1])
-
-    def draw_enemy_layout(self):
-        for tile in self.enemy_layout:
-            screen.blit(tile[0], tile[1])
+    # def draw_plants(self):
+    #     for tile in self.plant_list:
+    #         screen.blit(tile[0], tile[1])
+    #
+    # def draw_enemy_layout(self):
+    #     for tile in self.enemy_layout:
+    #         screen.blit(tile[0], tile[1])
 
     def reset_level(self):
         self.__init__(self.layout, self.block_size)
@@ -910,10 +902,10 @@ level_1 = Level(levels.Level_1, block_size)
 level_1_layout = level_1.get_layout()
 
 level_1_P = Level(levels.Level_1_plants, block_size)
-level_1_plants = level_1_P.get_plants()
+level_1_plants = level_1_P.get_layout()
 
 level_1_E = Level(levels.level_1_enemy, block_size)
-level_1_enemy = level_1_E.get_enemy_layout()
+level_1_enemy = level_1_E.get_layout()
 
 ninja, enemy = level_1.get_characters()
 
@@ -924,6 +916,8 @@ moon_bg = pygame.image.load(moon_bg).convert_alpha()
 
 sword_group = pygame.sprite.Group()
 
+enemy_group = pygame.sprite.Group()
+enemy_group.add(enemy)
 ###################################################################################
 
 
@@ -950,8 +944,8 @@ while True:
     # draw_grid(screen_w, screen_h, block_size)
 
     level_1.draw()
-    level_1_P.draw_plants()
-    level_1_E.draw_enemy_layout()
+    level_1_P.draw()
+    level_1_E.draw()
 
     ninja.update()
 
@@ -994,13 +988,11 @@ while True:
             knife_total = 0
 
     # PLAYER DETECTION WITH ENEMY
-    if enemy.image_rect.colliderect(ninja.image_rect.x, ninja.image_rect.y, ninja.image_rect.width, ninja.image_rect.height):
+    # if enemy.image_rect.colliderect(ninja.image_rect.x, ninja.image_rect.y, ninja.image_rect.width, ninja.image_rect.height):
+    if pygame.sprite.spritecollide(ninja, enemy_group, True):
         level_1.reset_level()
         level_1_P.reset_level()
         level_1_E.reset_level()
-        enemy.reset_enemy()
-        ninja.reset_player()
-
 
     # screen.blit(E_run, (500, 220))
 
